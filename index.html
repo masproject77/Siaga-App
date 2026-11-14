@@ -58,7 +58,7 @@ function login_(){$('#m').innerHTML=`<div class="card" style="margin-top:40px;te
 async function doLogin(b){const r=await api('login',{username:$('#u').value.trim(),hash:await sha($('#p').value)},b);if(r.ok){S=r;localStorage.siaga=JSON.stringify(S);start()}}
 function logout(){clearInterval(window.ri);clearInterval(window.si);$('#sy').style.display='none';localStorage.removeItem('siaga');S=null;login_()}
 function start(){cfg=S.cfg;$('#who').textContent=S.user.nama+' · '+S.user.role;
- const n=[['home','🏠','Beranda'],['absen','🕘','Absen'],['kerja',S.user.tim==='security'?'🛡':'🧹',S.user.tim==='security'?'Patroli':'Kerja'],['rekap','📊','Rekap']];
+ const n=[['home','🏠','Beranda'],['absen','🕘','Absen'],['kerja',tm().ic,S.user.tim==='security'?'Patroli':'Kerja'],['rekap','📊','Rekap']];
  if(S.user.role!=='user')n.push(['admin','⚙','Admin']);
  $('#nv').innerHTML=n.map(x=>`<a href="#" data-t="${x[0]}" onclick="go('${x[0]}');return false">${x[1]}<br>${x[2]}</a>`).join('');go('home');remindOn();offInit()}
 function go(t){tab=t;document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.t==t));({home,absen,kerja,rekap,admin})[t]()}
@@ -79,19 +79,19 @@ function hav(a,b,c,d){const t=x=>x*Math.PI/180,q=Math.sin(t(c-a)/2)**2+Math.cos(
 function kerja(){if(S.user.tim==='security')patStat().then(d=>{$('#ps').innerHTML=d.map(chip).join('')||'Belum ada titik'});
  if(S.user.tim==='security')return $('#m').innerHTML=`<div class="card"><b>Status Patroli per Blok</b><div id="ps">Memuat…</div></div><div class="card"><b>Patroli Rutin</b><p style="color:var(--g);font-size:13px">Setiap ${cfg.interval_patroli_jam} jam, wajib tiap blok. Scan barcode di titik, GPS dicek.</p>${B('📷 Scan Barcode & Foto','patrol')}</div>
 <div class="card"><b>Jadwal Piket & Backup</b><p style="font-size:13px">Lihat/atur di menu Admin → Piket (kolom backup untuk pengganti petugas berhalangan).</p></div>`;
- const j=['Potong Rumput','Sapu Jalan','Saluran Air','Potong Ranting Pohon','Pengangkutan Sampah'];
- $('#m').innerHTML=`<div class="card"><b>Laporan Pekerjaan</b><select id="jn">${j.map(x=>`<option>${x}</option>`)}</select><textarea id="kt" placeholder="Catatan"></textarea>${B('📷 Foto & Kirim','kirimKerja')}</div>`}
-async function kirimKerja(b){const g=await gps();const f=await shot(g);if(f)await send('kerja',{jenis:$('#jn').value,ket:$('#kt').value,lat:g.lat,lng:g.lng,foto:f},b)}
+ const T=tm();
+ $('#m').innerHTML=`<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${B('📷 Foto & Kirim','kirimKerja')}</div>`}
+async function kirimKerja(b){const T=tm();if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');const g=await gps();const f=await shot(g);if(f)await send('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f},b)}
 async function patrol(b){const g=await gps();let kode;
  if('BarcodeDetector'in window){const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}),v=document.createElement('video');v.srcObject=st;v.setAttribute('playsinline','');await v.play();const d=new BarcodeDetector({formats:['qr_code','code_128']});toast('Arahkan ke barcode…');
   for(let i=0;i<60&&!kode;i++){const r=await d.detect(v).catch(()=>[]);if(r[0])kode=r[0].rawValue;await new Promise(r=>setTimeout(r,300))}st.getTracks().forEach(t=>t.stop())}
  kode=kode||prompt('Masukkan kode titik:');if(!kode)return;const TL=JSON.parse(localStorage.siagaTitik||'[]');
  if(TL.length){const T=TL.find(t=>String(t.kode)===String(kode));if(!T)return toast('⚠ Barcode tidak dikenal');const d=hav(g.lat,g.lng,+T.lat,+T.lng);if(d>cfg.radius)return toast('⚠ Di luar radius titik ('+Math.round(d)+' m)')}
  const f=await shot(g);if(f)await send('patroli',{kode,lat:g.lat,lng:g.lng,foto:f},b)}
-let rt='Absen',rd=[];
-async function rekap(){$('#m').innerHTML=`<div class="card np"><select id="rs" onchange="rt=this.value;rekap()">${['Absen','Kerja','Patroli'].map(x=>`<option ${x==rt?'selected':''}>${x}</option>`)}</select>
+let rt='Absen',rd=[],rtm='';
+async function rekap(){$('#m').innerHTML=`<div class="card np"><select id="rs" onchange="rt=this.value;rekap()">${['Absen','Kerja','Patroli'].map(x=>`<option ${x==rt?'selected':''}>${x}</option>`)}</select>${rt==='Kerja'&&S.user.role!=='user'?`<select onchange="rtm=this.value;rekap()"><option value="">Semua tim</option>${Object.keys(TIM).filter(k=>TIM[k].j).map(k=>`<option value="${k}" ${k==rtm?'selected':''}>${TIM[k].n}</option>`).join('')}</select>`:''}
 <div class="row" style="grid-template-columns:1fr 1fr">${B('📄 PDF','window.print;print','o')}${B('📗 Excel','xls','o')}</div></div><div class="card tw" id="tb">Memuat…</div>`;
- const r=await api('rekap',{tabel:rt});if(r.ok){rd=r.data;$('#tb').innerHTML=tbl(rd)}else $('#tb').innerHTML='📴 Rekap memerlukan koneksi internet.'}
+ const r=await api('rekap',{tabel:rt});if(r.ok){rd=r.data.filter(x=>rt!=='Kerja'||!rtm||x.tim===rtm);const tot=rd.reduce((a,x)=>a+(+x.nilai||0),0);$('#tb').innerHTML=(tot?`<p><b>Total nominal: Rp ${tot.toLocaleString('id-ID')}</b></p>`:'')+tbl(rd)}else $('#tb').innerHTML='📴 Rekap memerlukan koneksi internet.'}
 function tbl(d){if(!d.length)return'Tidak ada data';const k=Object.keys(d[0]).filter(x=>x!=='_r');return`<table><tr>${k.map(x=>`<th>${x}</th>`).join('')}</tr>${d.map(r=>`<tr>${k.map(x=>`<td>${String(r[x]).startsWith('http')?`<a href="${r[x]}" target=_blank>foto</a>`:fmt(r[x])}</td>`).join('')}</tr>`).join('')}</table>`}
 function xls(){const h='<html><meta charset=utf-8><body>'+tbl(rd)+'</body></html>',a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'application/vnd.ms-excel'}));a.download='SIAGA_'+rt+'.xls';a.click()}
 let at='Users',ed=null;
@@ -106,7 +106,7 @@ async function remind(){const d=(await patStat()).filter(x=>x.telat);if(!d.lengt
 function remindOn(){clearInterval(window.ri);if(S.user.tim!=='security')return;if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();window.ri=setInterval(remind,300000);setTimeout(remind,4000)}
 // ===== Form admin =====
 const FORM={
- Users:[['username','Username'],['pass','Password (kosongkan = tidak diubah)','password'],['nama','Nama lengkap'],['role','Role','select',['user','spv','admin']],['grup','Grup'],['tim','Tim','select',['kebersihan','security']]],
+ Users:[['username','Username'],['pass','Password (kosongkan = tidak diubah)','password'],['nama','Nama lengkap'],['role','Role','select',['user','spv','admin']],['grup','Grup'],['tim','Tim','select',['kebersihan','security','maintenance','unitusaha','admin','ipl']]],
  Setting:[['key','Pengaturan','select',['lokasi_lat','lokasi_lng','radius','jam_masuk','jam_pulang','shift_security','total_titik','interval_patroli_jam','backup_simpan']],['value','Nilai (jam format 07:00)']],
  Titik:[['kode','Kode barcode'],['nama','Nama titik'],['blok','Blok'],['lat','Latitude'],['lng','Longitude']],
  Grup:[['grup','Nama grup'],['member','Anggota (username, pisah koma)']],
@@ -139,6 +139,15 @@ async function bkDl(b){const j=$('#bk').value,r=await api('backupExport',{jenis:
 async function bkRestore(b){const f=$('#bf').files[0];if(!f)return toast('⚠ Pilih file JSON dulu');let j;try{j=JSON.parse(await f.text())}catch(e){return toast('⚠ File bukan JSON valid')}
  if(!j.tables)return toast('⚠ Bukan file backup SIAGA');if(!confirm('Pulihkan konfigurasi dari file ini? Data user, setting, titik, grup, piket, dan berita saat ini akan ditimpa.'))return;await api('restoreKonfig',{data:j},b)}
 async function bkApp(b){b.classList.add('busy');try{for(const n of['index.html','manifest.json','sw.js']){const t=await fetch(n,{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.text()});dl(n,t,'text/plain');await new Promise(r=>setTimeout(r,600))}toast('✔ File aplikasi terunduh')}catch(e){toast('⚠ Gagal mengunduh. Buka aplikasi dari alamat hosting')}finally{b.classList.remove('busy')}}
+// ===== Definisi tim =====
+const TIM={
+ kebersihan:{n:'Kebersihan',ic:'🧹',j:['Potong Rumput','Sapu Jalan','Saluran Air','Potong Ranting Pohon','Pengangkutan Sampah']},
+ security:{n:'Security',ic:'🛡'},
+ maintenance:{n:'Maintenance',ic:'🔧',j:['Perbaikan Listrik/PJU','Perbaikan Pipa/Air','Perbaikan Jalan/Paving','Perbaikan Fasilitas','Pengecatan','Lainnya']},
+ unitusaha:{n:'Unit Usaha',ic:'🏪',j:['Pendapatan Harian','Pengeluaran','Sewa Fasilitas','Inventaris/Stok','Lainnya'],nilai:1},
+ admin:{n:'Admin',ic:'🗂',j:['Surat Menyurat','Pelayanan Warga','Pengaduan Warga','Arsip/Dokumen','Rapat/Koordinasi','Lainnya']},
+ ipl:{n:'Penagihan IPL',ic:'💳',j:['Kunjungan Penagihan','Pembayaran Diterima','Janji Bayar','Warga Tidak di Tempat','Surat Peringatan'],rumah:1,nilai:1}};
+const tm=()=>TIM[S.user.tim]||TIM.kebersihan;
 // ===== Mode offline: antrean IndexedDB + sinkronisasi otomatis/manual =====
 const IDB=new Promise((ok,no)=>{const q=indexedDB.open('siaga',1);q.onupgradeneeded=()=>q.result.createObjectStore('q',{keyPath:'uid'});q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});
 const idb=async(w,f)=>{const d=await IDB;return new Promise((ok,no)=>{const t=d.transaction('q',w?'readwrite':'readonly'),r=f(t.objectStore('q'));t.oncomplete=()=>ok(r.result);t.onerror=()=>no(t.error)})};
