@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1558d6"><link rel="manifest" href="manifest.json"><title>SIAGA</title>
+<style>
+:root{--b:#1558d6;--b2:#e8f0ff;--t:#16233b;--g:#6b7a90;--bd:#dde5f2}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f5f8ff;color:var(--t);padding-bottom:70px}
+header{background:var(--b);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+.logo{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--b);font-weight:800;display:grid;place-items:center}
+header small{display:block;opacity:.85;font-size:11px}main{padding:14px;max-width:720px;margin:auto}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--b2);border-radius:12px;padding:10px;text-align:center}
+.stat b{font-size:22px;color:var(--b);display:block}
+button,select,input,textarea{font:inherit;width:100%;padding:12px;border-radius:10px;border:1px solid var(--bd);margin:4px 0}
+button{background:var(--b);color:#fff;border:0;font-weight:600;display:flex;justify-content:center;gap:8px;align-items:center}
+button.o{background:#fff;color:var(--b);border:1px solid var(--b)}button.r{background:#d92d20}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav a{flex:1;text-align:center;padding:10px 0;font-size:12px;color:var(--g)}nav a.on{color:var(--b);font-weight:700}
+.sp{width:16px;height:16px;border:2px solid #fff6;border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;display:none}
+.busy .sp{display:block}@keyframes s{to{transform:rotate(360deg)}}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#16233b;color:#fff;padding:10px 16px;border-radius:20px;z-index:99;display:none;max-width:90%}
+#cam{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column}#cam video{flex:1;min-height:0;object-fit:cover}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border-bottom:1px solid var(--bd);padding:6px;text-align:left;white-space:nowrap}
+.news{border-left:4px solid var(--b);padding-left:10px;margin:8px 0}.hide{display:none}
+@media print{header,nav,.np{display:none}}
+</style></head><body>
+<header><div class="logo" id="lg">S</div><div><b>SIAGA</b><small>Respect, Respon, Report, Reaction</small></div>
+<span id="who" style="margin-left:auto;font-size:12px"></span><button id="sy" class="syncb" onclick="sync(this)" style="display:none;width:auto;margin:0;padding:6px 10px;background:#fff;color:var(--b);align-items:center"><span class="sp" style="border-color:#1558d655;border-top-color:#1558d6"></span><span id="sn">⟳</span></button></header>
+<main id="m"></main><nav id="nv"></nav><div id="toast"></div>
+<div id="cam"><video id="v" playsinline autoplay muted></video>
+<div style="padding:12px;display:flex;gap:8px"><button class="o" onclick="camX(0)">Batal</button><button id="snap" onclick="camX(1)">📷 Ambil Foto</button></div></div>
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbz5U9eNaG8ebcrGWBumj8xWMAwZBbyL3jYRLG-RMfCYMVkNwpnOO6IYHXKGbYmAjoNb/exec', LOGO_URL='' /* isi URL logo instansi (opsional) */;
+let S=JSON.parse(localStorage.siaga||'null'),tab='home',cfg={},logoImg=null;
+const $=s=>document.querySelector(s),sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e.t);e.t=setTimeout(()=>e.style.display='none',3200)}
+async function api(a,d={},btn,q){if(btn)btn.classList.add('busy'),btn.disabled=true;
+ try{const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action:a,token:S&&S.token,...d})}).then(r=>r.json());
+  if(r.expired&&q!==2)logout();if(q!==2){if(!r.ok)toast('⚠ '+(r.msg||'Gagal'));else if(r.msg)toast('✔ '+r.msg)}return r}
+ catch(e){if(!q)toast('⚠ Koneksi gagal');return{ok:false,net:true}}finally{if(btn)btn.classList.remove('busy'),btn.disabled=false}}
+const B=(t,f,c='')=>`<button class="${c}" onclick="${f}(this)"><span class="sp"></span>${t}</button>`;
+// ===== GPS + deteksi Fake GPS =====
+function gps(){return new Promise((ok,no)=>{let p=[];const w=navigator.geolocation.watchPosition(x=>{p.push(x);if(p.length>=3){navigator.geolocation.clearWatch(w);
+ const a=p[p.length-1].coords,f=p.every(q=>q.coords.accuracy===0)||a.accuracy<1||(p.every(q=>q.coords.latitude===a.latitude&&q.coords.longitude===a.longitude&&q.coords.altitude===null&&q.coords.speed===null&&a.accuracy%1===0&&a.accuracy>0&&a.accuracy<5));
+ ok({lat:a.latitude,lng:a.longitude,acc:a.accuracy,fake:f})}},e=>{toast('⚠ Aktifkan GPS');no(e)},{enableHighAccuracy:true,timeout:20000});})}
+// ===== Kamera langsung (tanpa galeri) + watermark + resize =====
+let camR;async function foto(){const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});$('#v').srcObject=st;$('#cam').style.display='flex';
+ return new Promise(r=>camR=a=>{st.getTracks().forEach(t=>t.stop());$('#cam').style.display='none';r(a)})}
+function camX(ok){if(!ok)return camR(null);const v=$('#v'),W=800,H=Math.round(W*v.videoHeight/v.videoWidth),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ x.drawImage(v,0,0,W,H);camR(c)}
+async function shot(g){const c=await foto();if(!c)return null;const x=c.getContext('2d'),t=new Date().toLocaleString('id-ID')+' | '+g.lat.toFixed(6)+','+g.lng.toFixed(6)+' | '+S.user.nama;
+ x.fillStyle='#000a';x.fillRect(0,c.height-30,c.width,30);x.fillStyle='#fff';x.font='14px sans-serif';x.fillText(t,8,c.height-10);
+ x.fillStyle='#fff';x.beginPath();x.arc(36,36,26,0,7);x.fill();if(logoImg)x.drawImage(logoImg,12,12,48,48);else{x.fillStyle='#1558d6';x.font='bold 28px sans-serif';x.fillText('S',27,46)}
+ return c.toDataURL('image/jpeg',.7)}
+// ===== Auth =====
+function login_(){$('#m').innerHTML=`<div class="card" style="margin-top:40px;text-align:center"><div class="logo" style="margin:auto;width:64px;height:64px;font-size:32px;background:var(--b);color:#fff">S</div><h2 style="margin:8px 0 0;color:var(--b)">SIAGA</h2><p style="color:var(--g);margin-top:0">Respect, Respon, Report, Reaction</p>
+<input id="u" placeholder="Username" autocapitalize="none"><input id="p" type="password" placeholder="Password">${B('Masuk','doLogin')}</div>`;$('#nv').innerHTML='';$('#who').textContent=''}
+async function doLogin(b){const r=await api('login',{username:$('#u').value.trim(),hash:await sha($('#p').value)},b);if(r.ok){S=r;localStorage.siaga=JSON.stringify(S);start()}}
+function logout(){clearInterval(window.ri);clearInterval(window.si);$('#sy').style.display='none';localStorage.removeItem('siaga');S=null;login_()}
+function start(){cfg=S.cfg;$('#who').textContent=S.user.nama+' · '+S.user.role;
+ const n=[['home','🏠','Beranda'],['absen','🕘','Absen'],['kerja',S.user.tim==='security'?'🛡':'🧹',S.user.tim==='security'?'Patroli':'Kerja'],['rekap','📊','Rekap']];
+ if(S.user.role!=='user')n.push(['admin','⚙','Admin']);
+ $('#nv').innerHTML=n.map(x=>`<a href="#" data-t="${x[0]}" onclick="go('${x[0]}');return false">${x[1]}<br>${x[2]}</a>`).join('');go('home');remindOn();offInit()}
+function go(t){tab=t;document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.t==t));({home,absen,kerja,rekap,admin})[t]()}
+// ===== Halaman =====
+async function home(){$('#m').innerHTML='<div class="card">Memuat…</div>';let r=await api('home',{},null,1);if(r.ok)localStorage.siagaHome=JSON.stringify(r);else if(r.net){r=JSON.parse(localStorage.siagaHome||'{"ok":true,"berita":[],"summary":{"absen":0,"kerja":0,"patroli":0}}');r.cached=1}else return;const s=r.summary,Q=(await qAll()).filter(x=>x.user===S.user.username);
+ $('#m').innerHTML=`${r.cached?'<div class="card" style="background:#fff6e0">📴 Mode offline: menampilkan data terakhir tersimpan.</div>':''}<div class="card"><b>Ringkasan Hari Ini</b><div class="row" style="margin-top:8px"><div class="stat"><b>${s.absen}</b>Absen</div><div class="stat"><b>${s.kerja}</b>Kerja</div><div class="stat"><b>${s.patroli}</b>Patroli</div></div></div>
+ <div class="card"><b>📰 Info & Berita</b>${r.berita.map(n=>`<div class="news"><b>${n.judul}</b><br><small>${n.isi}</small></div>`).join('')||'<p>Belum ada berita</p>'}</div>
+ <div class="card"><b>📤 Antrean Sinkronisasi (${Q.length})</b>${Q.map(x=>`<div class="news" style="border-color:${x.st==='rej'?'#d92d20':'#f59e0b'};display:flex;justify-content:space-between;gap:8px;font-size:13px"><div>${lbl(x)} · ${new Date(x.d.ts).toLocaleString('id-ID')}<br><small style="color:${x.st==='rej'?'#d92d20':'var(--g)'}">${x.st==='rej'?'Ditolak: '+x.err:'Menunggu koneksi'}</small></div>${x.st==='rej'?`<button class="r" style="width:auto;padding:4px 10px" onclick="qrm('${x.uid}')">Hapus</button>`:''}</div>`).join('')||'<small>Semua data sudah tersinkron ✔</small>'}${B('🔄 Sinkronisasi Manual','sync','syncb')}</div>
+ <div class="card">${B('🚨 LAPOR DARURAT','darurat','r')}</div>${B('Keluar','logout','o')}`}
+async function darurat(b){const p=prompt('Jelaskan kondisi darurat:');if(!p)return;const g=await gps();await send('darurat',{pesan:p,lat:g.lat,lng:g.lng},b)}
+function absen(){$('#m').innerHTML=`<div class="card"><b>Absensi</b><p style="color:var(--g);font-size:13px">Absen IN/OUT hanya di radius ${cfg.radius} m dari Balai Warga. Foto selfie wajib dari kamera.</p>
+${B('✅ Absen IN','ab(this,\'IN\')')}${B('🏁 Absen OUT','ab(this,\'OUT\')','o')}
+<hr><input id="ket" placeholder="Keterangan permit (sakit/izin)">${B('📝 Ajukan PERMIT + Foto Dokumen','ab(this,\'PERMIT\')','o')}</div>`}
+async function ab(b,tipe){b.classList.add('busy');try{const g=await gps();if(g.fake)return toast('⚠ Fake GPS terdeteksi');
+ const d=hav(g.lat,g.lng,+cfg.lokasi_lat,+cfg.lokasi_lng);if(tipe!=='PERMIT'&&d>cfg.radius)return toast('⚠ Di luar radius ('+Math.round(d)+' m)');
+ const f=await shot(g);if(!f)return;await send('absen',{tipe,lat:g.lat,lng:g.lng,fake:g.fake,foto:f,ket:$('#ket')?.value||''},b)}finally{b.classList.remove('busy')}}
+function hav(a,b,c,d){const t=x=>x*Math.PI/180,q=Math.sin(t(c-a)/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(t(d-b)/2)**2;return 12742000*Math.asin(Math.sqrt(q))}
+function kerja(){if(S.user.tim==='security')patStat().then(d=>{$('#ps').innerHTML=d.map(chip).join('')||'Belum ada titik'});
+ if(S.user.tim==='security')return $('#m').innerHTML=`<div class="card"><b>Status Patroli per Blok</b><div id="ps">Memuat…</div></div><div class="card"><b>Patroli Rutin</b><p style="color:var(--g);font-size:13px">Setiap ${cfg.interval_patroli_jam} jam, wajib tiap blok. Scan barcode di titik, GPS dicek.</p>${B('📷 Scan Barcode & Foto','patrol')}</div>
+<div class="card"><b>Jadwal Piket & Backup</b><p style="font-size:13px">Lihat/atur di menu Admin → Piket (kolom backup untuk pengganti petugas berhalangan).</p></div>`;
+ const j=['Potong Rumput','Sapu Jalan','Saluran Air','Potong Ranting Pohon','Pengangkutan Sampah'];
+ $('#m').innerHTML=`<div class="card"><b>Laporan Pekerjaan</b><select id="jn">${j.map(x=>`<option>${x}</option>`)}</select><textarea id="kt" placeholder="Catatan"></textarea>${B('📷 Foto & Kirim','kirimKerja')}</div>`}
+async function kirimKerja(b){const g=await gps();const f=await shot(g);if(f)await send('kerja',{jenis:$('#jn').value,ket:$('#kt').value,lat:g.lat,lng:g.lng,foto:f},b)}
+async function patrol(b){const g=await gps();let kode;
+ if('BarcodeDetector'in window){const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}),v=document.createElement('video');v.srcObject=st;v.setAttribute('playsinline','');await v.play();const d=new BarcodeDetector({formats:['qr_code','code_128']});toast('Arahkan ke barcode…');
+  for(let i=0;i<60&&!kode;i++){const r=await d.detect(v).catch(()=>[]);if(r[0])kode=r[0].rawValue;await new Promise(r=>setTimeout(r,300))}st.getTracks().forEach(t=>t.stop())}
+ kode=kode||prompt('Masukkan kode titik:');if(!kode)return;const TL=JSON.parse(localStorage.siagaTitik||'[]');
+ if(TL.length){const T=TL.find(t=>String(t.kode)===String(kode));if(!T)return toast('⚠ Barcode tidak dikenal');const d=hav(g.lat,g.lng,+T.lat,+T.lng);if(d>cfg.radius)return toast('⚠ Di luar radius titik ('+Math.round(d)+' m)')}
+ const f=await shot(g);if(f)await send('patroli',{kode,lat:g.lat,lng:g.lng,foto:f},b)}
+let rt='Absen',rd=[];
+async function rekap(){$('#m').innerHTML=`<div class="card np"><select id="rs" onchange="rt=this.value;rekap()">${['Absen','Kerja','Patroli'].map(x=>`<option ${x==rt?'selected':''}>${x}</option>`)}</select>
+<div class="row" style="grid-template-columns:1fr 1fr">${B('📄 PDF','window.print;print','o')}${B('📗 Excel','xls','o')}</div></div><div class="card tw" id="tb">Memuat…</div>`;
+ const r=await api('rekap',{tabel:rt});if(r.ok){rd=r.data;$('#tb').innerHTML=tbl(rd)}else $('#tb').innerHTML='📴 Rekap memerlukan koneksi internet.'}
+function tbl(d){if(!d.length)return'Tidak ada data';const k=Object.keys(d[0]).filter(x=>x!=='_r');return`<table><tr>${k.map(x=>`<th>${x}</th>`).join('')}</tr>${d.map(r=>`<tr>${k.map(x=>`<td>${String(r[x]).startsWith('http')?`<a href="${r[x]}" target=_blank>foto</a>`:fmt(r[x])}</td>`).join('')}</tr>`).join('')}</table>`}
+function xls(){const h='<html><meta charset=utf-8><body>'+tbl(rd)+'</body></html>',a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'application/vnd.ms-excel'}));a.download='SIAGA_'+rt+'.xls';a.click()}
+let at='Users',ed=null;
+const fmt=v=>typeof v==='string'?v.replace(/^(\d{4}-\d\d-\d\d)T(\d\d:\d\d):\d\d.*$/,(m,d,t)=>t==='00:00'?d:d+' '+t):v;
+// ===== Pengingat patroli per blok =====
+async function patStat(){const r=await api('patroliStatus',{},null,2);let d=r.ok?r.data:JSON.parse(localStorage.siagaPat||'[]');if(r.ok)localStorage.siagaPat=JSON.stringify(d);
+ const T=JSON.parse(localStorage.siagaTitik||'[]'),Q=(await qAll()).filter(x=>x.a==='patroli'&&x.user===S.user.username),iv=cfg.interval_patroli_jam*3600000;
+ return d.map(x=>{let l=x.last?new Date(x.last).getTime():0;Q.forEach(q=>{const t=T.find(t=>String(t.kode)===String(q.d.kode));if(t&&String(t.blok)===String(x.blok))l=Math.max(l,new Date(q.d.ts).getTime())});
+  const m=l?Math.round((l+iv-Date.now())/60000):-9999;return{blok:x.blok,last:l?1:'',menit:m,telat:m<0}})}
+const chip=x=>`<div class="stat" style="background:${x.telat?'#fde8e6':'#e6f6ec'};text-align:left;display:flex;justify-content:space-between;margin:4px 0"><b style="font-size:15px;color:${x.telat?'#d92d20':'#12805c'}">Blok ${x.blok}</b><span>${!x.last?'Belum patroli':x.telat?'Terlambat '+(-x.menit)+' mnt':'Sisa '+x.menit+' mnt'}</span></div>`;
+async function remind(){const d=(await patStat()).filter(x=>x.telat);if(!d.length)return;const t='⏰ Patroli terlambat: Blok '+d.map(x=>x.blok).join(', ');toast(t);navigator.vibrate&&navigator.vibrate([300,100,300]);if('Notification'in window&&Notification.permission==='granted')new Notification('SIAGA',{body:t})}
+function remindOn(){clearInterval(window.ri);if(S.user.tim!=='security')return;if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();window.ri=setInterval(remind,300000);setTimeout(remind,4000)}
+// ===== Form admin =====
+const FORM={
+ Users:[['username','Username'],['pass','Password (kosongkan = tidak diubah)','password'],['nama','Nama lengkap'],['role','Role','select',['user','spv','admin']],['grup','Grup'],['tim','Tim','select',['kebersihan','security']]],
+ Setting:[['key','Pengaturan','select',['lokasi_lat','lokasi_lng','radius','jam_masuk','jam_pulang','shift_security','total_titik','interval_patroli_jam','backup_simpan']],['value','Nilai (jam format 07:00)']],
+ Titik:[['kode','Kode barcode'],['nama','Nama titik'],['blok','Blok'],['lat','Latitude'],['lng','Longitude']],
+ Grup:[['grup','Nama grup'],['member','Anggota (username, pisah koma)']],
+ Piket:[['tanggal','Tanggal','date'],['shift','Shift','select',['Pagi','Siang','Malam','24 Jam']],['user','Petugas (username)'],['backup','Backup bila berhalangan']],
+ Berita:[['ts','Tanggal','date'],['judul','Judul'],['isi','Isi berita','textarea']]};
+function fld(f,v){const[k,l,t,o]=f,id='f_'+k;v=v??'';return `<label style="font-size:12px;color:var(--g)">${l}</label>`+(t==='select'?`<select id="${id}">${o.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('')}</select>`:t==='textarea'?`<textarea id="${id}" rows=3>${v}</textarea>`:`<input id="${id}" type="${t||'text'}" value="${v}">`)}
+function form(row){ed=row;$('#af').innerHTML=`<b>${row?'✏ Edit data':'➕ Tambah data'}</b>`+FORM[at].map(f=>fld(f,f[2]==='date'?(row?String(row[f[0]]).slice(0,10):new Date().toISOString().slice(0,10)):row&&f[0]!=='pass'?row[f[0]]:'')).join('')+(at==='Titik'?B('📍 Isi dengan lokasi saya','myLoc','o'):'')+B('💾 Simpan','adm')+(row?B('Batal','cancelF','o'):'')}
+function cancelF(){form(null)}
+async function myLoc(){const g=await gps();$('#f_lat').value=g.lat.toFixed(6);$('#f_lng').value=g.lng.toFixed(6);toast('✔ Lokasi terisi')}
+async function admin(){const T=S.user.role==='admin'?['Users','Setting','Titik','Grup','Piket','Berita','Log','Backup']:['Grup','Piket','Berita'];if(!T.includes(at))at=T[0];
+ $('#m').innerHTML=`<div class="card"><b>Menu Admin</b><select onchange="at=this.value;admin()">${T.map(x=>`<option ${x==at?'selected':''}>${x}</option>`)}</select></div>${at==='Log'||at==='Backup'?'':'<div class="card" id="af"></div>'}<div class="card" id="al">Memuat…</div>`;
+ if(at==='Backup')return backupUI();if(at!=='Log')form(null);const r=await api('adminList',{tabel:at});if(!r.ok)return;rd=r.data;
+ $('#al').innerHTML=at==='Log'?`<div class="tw">${tbl(rd.slice(-100).reverse())}</div>`:(rd.map((x,i)=>{const k=Object.keys(x).filter(c=>c!=='_r');return `<div class="news" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="min-width:0;font-size:13px"><b>${fmt(x[k[0]])}</b><br><small style="color:var(--g)">${k.slice(1).map(c=>fmt(x[c])).filter(v=>v!=='').join(' · ')}</small></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="o" style="width:auto;padding:6px 10px" onclick="form(rd[${i}]);scrollTo(0,0)">Edit</button><button class="r" style="width:auto;padding:6px 10px" onclick="del_(this,${x._r})"><span class="sp"></span>Hapus</button></div></div>`}).join('')||'Belum ada data')}
+async function adm(b){const row={};for(const f of FORM[at])row[f[0]]=$('#f_'+f[0]).value.trim();if(ed)row._r=ed._r;
+ const k0=FORM[at][0][0];if(!row[k0])return toast('⚠ Kolom "'+FORM[at][0][1]+'" wajib diisi');
+ if(at==='Users'){if(!row.nama)return toast('⚠ Nama wajib diisi');if(!ed&&!row.pass)return toast('⚠ Password wajib untuk user baru');if(!row.pass)delete row.pass}
+ for(const k of['lat','lng']){if(row[k]!==undefined){row[k]=parseFloat(row[k].replace(',','.'));if(isNaN(row[k]))return toast('⚠ Koordinat tidak valid')}}
+ const r=await api('adminSave',{tabel:at,row},b);if(r.ok)admin()}
+async function del_(b,rn){if(!confirm('Hapus data ini?'))return;const r=await api('adminDel',{tabel:at,rn},b);if(r.ok)admin()}
+if(LOGO_URL){logoImg=new Image();logoImg.crossOrigin='anonymous';logoImg.src=LOGO_URL;$('#lg').innerHTML=`<img src="${LOGO_URL}" width=30>`}
+// ===== Backup data & aplikasi (admin) =====
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click()}
+function backupUI(){const p='style="font-size:13px;color:var(--g)"';$('#al').innerHTML=`<b>💾 Backup Lengkap (Data + Kode Apps Script)</b><p ${p}>Menyalin seluruh Google Sheet beserta kode Apps Script ke folder SIAGA_Backup di Google Drive. Jumlah salinan disimpan sesuai pengaturan backup_simpan. Foto laporan tetap di folder SIAGA_Foto. Untuk backup harian otomatis, pasang trigger autoBackup.</p>${B('💾 Backup Sekarang','bkNow')}<div id="bl" style="margin-top:8px;font-size:13px">Memuat daftar…</div>
+<hr><b>⬇ Unduh Data (JSON)</b><select id="bk"><option value="konfig">Konfigurasi (user, setting, titik, grup, piket, berita)</option><option value="semua">Semua data (+ absen, kerja, patroli, log)</option></select>${B('⬇ Unduh JSON','bkDl','o')}
+<hr><b>♻ Pulihkan Konfigurasi</b><p ${p}>Pilih file JSON hasil unduhan. Backup lengkap dibuat otomatis sebelum data ditimpa. Data absen, kerja, dan patroli tidak diubah.</p><input type="file" id="bf" accept=".json,application/json">${B('♻ Pulihkan','bkRestore','r')}
+<hr><b>📦 Backup File Aplikasi</b><p ${p}>Mengunduh index.html, manifest.json, dan sw.js dari hosting. Code.gs sudah ikut tersalin di Backup Lengkap.</p>${B('📦 Unduh File Aplikasi','bkApp','o')}`;bkList()}
+async function bkList(){const r=await api('backupList',{},null,2);$('#bl').innerHTML=r.ok?(r.data.map(x=>`<div class="news"><b>${x.nama}</b><br><small>${fmt(x.waktu)}</small> · <a href="${x.url}" target=_blank>Buka</a></div>`).join('')||'Belum ada backup'):'⚠ '+(r.msg||'Gagal memuat daftar (offline?)')}
+async function bkNow(b){const r=await api('backupNow',{},b);if(r.ok)bkList()}
+async function bkDl(b){const j=$('#bk').value,r=await api('backupExport',{jenis:j},b);if(r.ok)dl('SIAGA_'+j+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(r.data),'application/json')}
+async function bkRestore(b){const f=$('#bf').files[0];if(!f)return toast('⚠ Pilih file JSON dulu');let j;try{j=JSON.parse(await f.text())}catch(e){return toast('⚠ File bukan JSON valid')}
+ if(!j.tables)return toast('⚠ Bukan file backup SIAGA');if(!confirm('Pulihkan konfigurasi dari file ini? Data user, setting, titik, grup, piket, dan berita saat ini akan ditimpa.'))return;await api('restoreKonfig',{data:j},b)}
+async function bkApp(b){b.classList.add('busy');try{for(const n of['index.html','manifest.json','sw.js']){const t=await fetch(n,{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.text()});dl(n,t,'text/plain');await new Promise(r=>setTimeout(r,600))}toast('✔ File aplikasi terunduh')}catch(e){toast('⚠ Gagal mengunduh. Buka aplikasi dari alamat hosting')}finally{b.classList.remove('busy')}}
+// ===== Mode offline: antrean IndexedDB + sinkronisasi otomatis/manual =====
+const IDB=new Promise((ok,no)=>{const q=indexedDB.open('siaga',1);q.onupgradeneeded=()=>q.result.createObjectStore('q',{keyPath:'uid'});q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});
+const idb=async(w,f)=>{const d=await IDB;return new Promise((ok,no)=>{const t=d.transaction('q',w?'readwrite':'readonly'),r=f(t.objectStore('q'));t.oncomplete=()=>ok(r.result);t.onerror=()=>no(t.error)})};
+const qAll=()=>idb(0,s=>s.getAll()),qPut=o=>idb(1,s=>s.put(o)),qDel=k=>idb(1,s=>s.delete(k));
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
+const lbl=x=>x.a==='absen'?'Absen '+x.d.tipe:x.a==='kerja'?'Kerja: '+x.d.jenis:x.a==='patroli'?'Patroli '+x.d.kode:'🚨 Darurat';
+let syncing=false,offInitDone=0;
+async function send(a,d,btn){const it={uid:uid(),a,d:{...d,ts:new Date().toISOString()},user:S.user.username,st:'wait'};
+ if(navigator.onLine){const r=await api(a,{...it.d,uid:it.uid},btn,1);if(!r.net&&!r.expired)return r}
+ it.d.off=1;await qPut(it);badge();toast(a==='darurat'?'🚨 Darurat tersimpan, dikirim otomatis saat ada sinyal':'📴 Tersimpan di HP, dikirim otomatis saat online');return{ok:true,queued:true}}
+async function badge(){if(!S||!$('#sn'))return;let n=0;try{n=(await qAll()).filter(x=>x.user===S.user.username).length}catch(e){}$('#sn').textContent=(navigator.onLine?'':'📴 ')+'⟳'+(n?' '+n:'')}
+async function sync(btn,auto){if(syncing||!S)return;syncing=true;const sp=document.querySelectorAll('.syncb');sp.forEach(x=>x.classList.add('busy'));let ok=0,bad=0,stop='';
+ try{const L=(await qAll()).filter(x=>x.user===S.user.username&&x.st!=='rej').sort((a,b)=>new Date(a.d.ts)-new Date(b.d.ts));
+  for(const it of L){const r=await api(it.a,{...it.d,uid:it.uid},null,2);
+   if(r.net){stop='net';break}if(r.expired){stop='exp';break}
+   if(r.ok){await qDel(it.uid);ok++}else{it.st='rej';it.err=r.msg||'Ditolak';await qPut(it);bad++}}
+ }catch(e){}finally{syncing=false;sp.forEach(x=>x.classList.remove('busy'));await badge()}
+ if(stop==='exp'){toast('🔐 Sesi habis. Login ulang untuk sinkronisasi');logout();return}
+ if(ok||bad||!auto)toast(stop==='net'?'📴 Belum ada koneksi, data tetap tersimpan':ok||bad?`✔ ${ok} data tersinkron${bad?`, ⚠ ${bad} ditolak`:''}`:'✔ Tidak ada data untuk disinkronkan');
+ if(tab==='home'&&(ok||bad))home()}
+async function qrm(u){if(!confirm('Hapus data yang ditolak ini?'))return;await qDel(u);badge();home()}
+function offInit(){$('#sy').style.display='flex';badge();navigator.storage&&navigator.storage.persist&&navigator.storage.persist();
+ api('titik',{},null,2).then(r=>{if(r.ok)localStorage.siagaTitik=JSON.stringify(r.data)});
+ clearInterval(window.si);window.si=setInterval(()=>sync(null,1),120000);setTimeout(()=>sync(null,1),3000);
+ if(!offInitDone){offInitDone=1;addEventListener('online',()=>{toast('🌐 Kembali online, sinkronisasi…');sync(null,1)});addEventListener('offline',()=>{toast('📴 Mode offline: data disimpan di HP');badge()})}}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+S?start():login_();
+</script></body></html>
