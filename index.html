@@ -2,7 +2,7 @@
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1558d6"><link rel="manifest" href="manifest.json"><title>SIAGA</title>
-<script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=Ol4hsp9QY9sfQhRhhQUXKjcofWGJRmwVl8NAI5yUo72ZIHzTIJO3cm8kZqm1bnnFGsaEURwr4pYqJKe1jdbD7wdd5gdUaPY0UhWGGAfLMh1Tgk1M90Ho2tQNeA2LtkA1JgHD-88jerlnsymuMGMYndL3eLr-QvY7WxeEVnSuO5V_HmpZCrr4iNyvawaBrjc14DEPvnycuKCEKuRHbKVOl8b7Dmop-9SoEapt2VuJj9NbiyD140b7-fbwSdfPrH0FkoOszd5c4GCsB_ngWfJ7NKaKPLOcbY2L-jzW9f4znNXjv3O_6q1BxhaXD-0OpBLVyDqlUnJdZHdmApg1P5hKVg" charset="UTF-8"></script><style>
+<script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=ZBUUT7R_4GVmVQSCVzBUrT60rZOTacwo74vDfzB-tqPvUDNGNMgrJqgHTOopiDHcYOF1VWZtvleMn-vzIEXrfjcikccxeEjWSAjvGaQQ1jEfbmYiPYH7_3Yue7oebdMSnoGeHnXBQfjidFpGAbflXT1GNuPwpSDzuxWCsfbsgsCu75xk6rn80PfYgfkC-rn4uS006Gs_1O7wQRdulrbqXxwDEKTI80vlZr4JK_VGInS8KkE83gSqUKd1DVSY39THwJtsLFzd1OPiv0rSzUyMjEwNHbDDZ-IEbGq7YJb-ly9myPgDwyUwq7-qIdRQqMeiCcAH5VTIvTRZ8A0Ej2zMGw" charset="UTF-8"></script><script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=Ol4hsp9QY9sfQhRhhQUXKjcofWGJRmwVl8NAI5yUo72ZIHzTIJO3cm8kZqm1bnnFGsaEURwr4pYqJKe1jdbD7wdd5gdUaPY0UhWGGAfLMh1Tgk1M90Ho2tQNeA2LtkA1JgHD-88jerlnsymuMGMYndL3eLr-QvY7WxeEVnSuO5V_HmpZCrr4iNyvawaBrjc14DEPvnycuKCEKuRHbKVOl8b7Dmop-9SoEapt2VuJj9NbiyD140b7-fbwSdfPrH0FkoOszd5c4GCsB_ngWfJ7NKaKPLOcbY2L-jzW9f4znNXjv3O_6q1BxhaXD-0OpBLVyDqlUnJdZHdmApg1P5hKVg" charset="UTF-8"></script><style>
 :root{--b:#1558d6;--b2:#e8f0ff;--t:#16233b;--g:#6b7a90;--bd:#dde5f2}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f5f8ff;color:var(--t);padding-bottom:70px}
 header{background:var(--b);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
@@ -289,6 +289,7 @@ async function pwSave(b){const o=$('#po').value,n=$('#pn').value,k=$('#pk').valu
 const tdy=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const PER=['pat','ush','usj','mt','ker','tam','kg'];
 let lipm='bulan',lth=String(new Date().getFullYear()),lipu='';
+let lkbm='bulan',lkbth=String(new Date().getFullYear()),lkbu='';
 let lt='absen',lbln=tdy().slice(0,7),ltg=tdy(),lgr='',lpm='hari',lus='',xn='';
 const stat=(a)=>`<div class="row" style="margin-bottom:10px;grid-template-columns:repeat(${a.length},1fr)">${a.map(x=>`<div class="stat"><b>${x[1]}</b>${x[0]}</div>`).join('')}</div>`;
 function lap(){const adm=['spv','admin'].includes(S.user.role),T=[['absen','Absen per User']];if(adm)T.push(['grup','Absen per Group']);if(S.user.tim==='security'||S.user.role!=='user')T.push(['pat','Patroli']);
@@ -296,10 +297,11 @@ function lap(){const adm=['spv','admin'].includes(S.user.role),T=[['absen','Abse
  if(S.user.tim==='security'||S.user.role!=='user')T.push(['tam','Buku Tamu'],['kg','Izin Kegiatan'],['loc','Lokasi Security']);
  if(S.user.tim==='maintenance'||S.user.role!=='user')T.push(['mt','Tiket Maintenance']);
  if(['kebersihan','admin'].includes(S.user.tim)||S.user.role!=='user')T.push(['ker','Pekerjaan']);
+ if(S.user.tim==='kebersihan'||S.user.role!=='user')T.push(['kbp','Performa Kebersihan']);
  if(S.user.tim==='ipl'||S.user.role!=='user')T.push(['ipl','Penagihan IPL']);
  if(!T.some(x=>x[0]===lt))lt='absen';
- $('#m').innerHTML=`<div class="card np"><b>📈 Laporan Ringkasan</b><select onchange="lt=this.value;lap()">${T.map(x=>`<option value="${x[0]}" ${x[0]==lt?'selected':''}>${x[1]}</option>`).join('')}</select>${lt==='ipl'?`<select onchange="lipm=this.value;lap()"><option value="bulan" ${lipm=='bulan'?'selected':''}>Per Bulan</option><option value="tahun" ${lipm=='tahun'?'selected':''}>Per Tahun</option></select>`:''}${PER.includes(lt)?`<select onchange="lpm=this.value;lap()"><option value="hari" ${lpm=='hari'?'selected':''}>Per Hari</option><option value="bulan" ${lpm=='bulan'?'selected':''}>Per Bulan</option></select>`:''}${PER.includes(lt)&&lpm==='hari'?`<input type="date" value="${ltg}" onchange="ltg=this.value||ltg;lap()">`:lt==='ipl'&&lipm==='tahun'?`<input type="number" min="2020" max="2100" value="${lth}" onchange="lth=this.value||lth;lap()">`:`<input type="month" value="${lbln}" onchange="lbln=this.value||lbln;lap()">`}<div class="row" style="grid-template-columns:1fr 1fr">${B('📄 PDF','window.print;print','o')}${B('📗 Excel','xls','o')}</div></div><div id="lb" class="card tw">Memuat…</div>`;
- ({absen:lAbsen,grup:lGrup,pat:lPat,ush:()=>usRep('sampah'),usj:()=>usRep('jual'),mt:lMt,ipl:lIpl,ker:lKer,tam:lTam,kg:lKg,loc:lLoc})[lt]()}
+ $('#m').innerHTML=`<div class="card np"><b>📈 Laporan Ringkasan</b><select onchange="lt=this.value;lap()">${T.map(x=>`<option value="${x[0]}" ${x[0]==lt?'selected':''}>${x[1]}</option>`).join('')}</select>${lt==='ipl'?`<select onchange="lipm=this.value;lap()"><option value="bulan" ${lipm=='bulan'?'selected':''}>Per Bulan</option><option value="tahun" ${lipm=='tahun'?'selected':''}>Per Tahun</option></select>`:''}${lt==='kbp'?`<select onchange="lkbm=this.value;lap()"><option value="bulan" ${lkbm=='bulan'?'selected':''}>Per Bulan</option><option value="tahun" ${lkbm=='tahun'?'selected':''}>Per Tahun</option></select>`:''}${PER.includes(lt)?`<select onchange="lpm=this.value;lap()"><option value="hari" ${lpm=='hari'?'selected':''}>Per Hari</option><option value="bulan" ${lpm=='bulan'?'selected':''}>Per Bulan</option></select>`:''}${PER.includes(lt)&&lpm==='hari'?`<input type="date" value="${ltg}" onchange="ltg=this.value||ltg;lap()">`:(lt==='ipl'&&lipm==='tahun')?`<input type="number" min="2020" max="2100" value="${lth}" onchange="lth=this.value||lth;lap()">`:(lt==='kbp'&&lkbm==='tahun')?`<input type="number" min="2020" max="2100" value="${lkbth}" onchange="lkbth=this.value||lkbth;lap()">`:`<input type="month" value="${lbln}" onchange="lbln=this.value||lbln;lap()">`}<div class="row" style="grid-template-columns:1fr 1fr">${B('📄 PDF','window.print;print','o')}${B('📗 Excel','xls','o')}</div></div><div id="lb" class="card tw">Memuat…</div>`;
+ ({absen:lAbsen,grup:lGrup,pat:lPat,ush:()=>usRep('sampah'),usj:()=>usRep('jual'),mt:lMt,ipl:lIpl,ker:lKer,kbp:lKbp,tam:lTam,kg:lKg,loc:lLoc})[lt]()}
 const off_='📴 Laporan memerlukan koneksi internet.';
 async function lAbsen(){if(S.user.role==='user')lus=S.user.username;const r=await api('sumAbsen',{bulan:lbln,user:lus},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const R=r.data.rows,sec=R.some(x=>x.tim==='security');
@@ -437,6 +439,48 @@ async function lIpl(){const yr=lipm==='tahun',r=await api('sumIPL',{bulan:lbln,t
  if(!yr)h+='<hr class="np"><b>Per blok</b>'+tbl(d.perBlok.map(x=>({Blok:x.blok,Petugas:x.petugas,Rumah:x.rumah,'Besar IPL':Math.round(x.tarif).toLocaleString('id-ID'),'Target (Rp)':Math.round(x.target).toLocaleString('id-ID'),'Realisasi (Rp)':Math.round(x.realisasi).toLocaleString('id-ID'),Lunas:x.lunas+'/'+x.rumah,'Capaian %':x.pct})));
  else{const us=R.map(x=>x.user);if(!us.includes(lipu))lipu=us[0]||'';h+=`<hr class="np"><b>Tren bulanan ${d.tahun}</b><select class="np" onchange="lipu=this.value;lap()">${R.map(x=>`<option value="${x.user}" ${x.user==lipu?'selected':''}>${esc(x.nama)}</option>`).join('')}</select>`+tbl((d.trend[lipu]||[]).map(x=>({Bulan:x.bulan,'Target (Rp)':Math.round(x.target).toLocaleString('id-ID'),'Realisasi (Rp)':Math.round(x.realisasi).toLocaleString('id-ID'),'Capaian %':x.pct,Lunas:x.lunas+'/'+x.rumahTarget})))}
  h+='<p style="font-size:12px;color:var(--g)">Capaian = realisasi ÷ target (jumlah rumah × besar IPL) berdasarkan bulan IPL. Performa: ≥100% Sangat Baik, ≥85% Baik, ≥70% Cukup, di bawahnya Perlu Ditingkatkan.</p>';$('#lb').innerHTML=h}
+async function lKbp(){
+ const yr=lkbm==='tahun',r=await api('sumKebersihan',{bulan:lbln,tahun:lkbth},null,1);
+ if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
+ const d=r.data,R=yr?d.tahunRows:d.bulanRows;
+ const totLap=R.reduce((a,x)=>a+x.totalLaporan,0);
+ const totBlok=R.reduce((a,x)=>a+x.blokTergarap,0);
+ const trgBlok=R.reduce((a,x)=>a+x.targetBlok,0);
+ const avgPct=trgBlok?Math.round(totBlok/trgBlok*1000)/10:0;
+ let h=`<b>🧹 Summary Performa Tim Kebersihan ${yr?d.tahun:d.bulan}</b>`+stat([['Total Laporan',totLap],['Blok Tergarap',totBlok+'/'+trgBlok],['Capaian Target',avgPct+'%']]);
+ const M=R.map(x=>({
+  '#':x.peringkat,
+  Petugas:x.nama,
+  'Hari Aktif':x.hariAktif,
+  'Total Laporan':x.totalLaporan,
+  'Blok Rutin':x.blokTergarap+'/'+x.targetBlok,
+  'Capaian %':x.pctBlok+'%',
+  'Angkut Sampah':x.angkutSampah,
+  'Aliran Sungai':x.aliranSungai,
+  'Foto Lengkap':x.fotoLengkap+' ('+x.pctFoto+'%)',
+  Performa:x.rating
+ }));
+ h+='<b>Performa per Petugas Kebersihan</b>'+tbl(M);
+ rd=M;xn='Performa_Kebersihan_'+(yr?d.tahun:d.bulan);
+ if(!yr){
+  h+='<hr class="np"><b>Rekap Jenis Pekerjaan ('+d.bulan+')</b>'+tbl(d.perJenis.map(x=>({'Jenis Pekerjaan':x.jenis,'Jumlah Laporan':x.jumlah,'Area / Blok':x.blok})));
+ }else{
+  const us=R.map(x=>x.user);if(!us.includes(lkbu))lkbu=us[0]||'';
+  h+=`<hr class="np"><b>Tren Bulanan ${d.tahun}</b><select class="np" onchange="lkbu=this.value;lap()">${R.map(x=>`<option value="${x.user}" ${x.user==lkbu?'selected':''}>${esc(x.nama)}</option>`).join('')}</select>`+tbl((d.trend[lkbu]||[]).map(x=>({
+   Bulan:x.bulan,
+   'Hari Aktif':x.hariAktif,
+   'Total Laporan':x.totalLaporan,
+   'Blok Rutin':x.blokTergarap+'/'+x.targetBlok,
+   'Capaian %':x.pctBlok+'%',
+   'Angkut Sampah':x.angkutSampah,
+   'Aliran Sungai':x.aliranSungai,
+   'Foto Lengkap %':x.pctFoto+'%',
+   Performa:x.rating
+  })));
+ }
+ h+='<p style="font-size:12px;color:var(--g)">Target Blok Rutin = Hari Aktif × 2 blok/hari (Cek Saluran Air, Potong Rumput, Potong Ranting, Sapu Jalan). Foto Lengkap = laporan dengan foto sebelum &amp; sesudah. Performa: ≥100% Sangat Baik, ≥85% Baik, ≥70% Cukup, &lt;70% Perlu Ditingkatkan.</p>';
+ $('#lb').innerHTML=h;
+}
 // ===== Security: Buku Tamu & Patroli =====
 let sm='tamu',TM=[],tmF={tamu:'',id:''},tmG=null;
 const jm=t=>/Z$/.test(String(t))?new Date(t).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):fmt(String(t)).slice(11);
