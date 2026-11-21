@@ -110,10 +110,19 @@ function dashHtml(d,u,T){const gb=(t,l)=>`<button onclick="go('${t}')">${l}</but
  if(u.tim==='ipl'){const p=d.ipl||{target:0,pct:0,realisasi:0,lunas:0,rumah:0,kunjungan:0,bulan:''};h+=`<div class="card"><b>💳 Target IPL ${p.bulan}</b>${p.target?`<div style="background:#e8f0ff;border-radius:6px;height:10px;margin:8px 0"><div style="width:${Math.min(100,p.pct)}%;background:${p.pct>=100?'#12805c':'var(--b)'};height:10px;border-radius:6px"></div></div>${stat([['Capaian',p.pct+'%'],['Terkumpul',rp(p.realisasi)],['Rumah lunas',p.lunas+'/'+p.rumah]])}<small>Kunjungan hari ini: ${p.kunjungan}</small>`:'<p style="font-size:13px;color:var(--g)">Belum ada target bulan ini. Hubungi SPV/Admin.</p>'}${gb('kerja','💳 Catat Penagihan')}</div>`}
  if(u.role!=='user'&&d.awas)h+=`<div class="card"><b>📋 Pengawasan</b>${stat([['Hadir (24 jam)',d.awas.hadir+'/'+d.awas.total],['Tiket aktif',d.awas.tiket],['Telat respon',d.awas.telat||0]])}<div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="go('lap')">📈 Laporan</button><button class="o" onclick="go('admin')">⚙ Admin</button></div></div>`;
  return h}
-async function home(){$('#m').innerHTML='<div class="card">Memuat…</div>';let r=await api('home',{},null,1);if(r.ok)localStorage.siagaHome=JSON.stringify(r);else if(r.net){r=JSON.parse(localStorage.siagaHome||'{"ok":true,"berita":[],"summary":{},"dash":{}}');r.cached=1}else return;
- const u=S.user,T=tm(),d=r.dash||{},Q=(await qAll()).filter(x=>x.user===u.username),hr=new Date().getHours(),sal=hr<11?'Selamat pagi':hr<15?'Selamat siang':hr<19?'Selamat sore':'Selamat malam',a=d.absen,qa=Q.filter(x=>x.a==='absen').pop();
+async function home(){let c=null;try{c=JSON.parse(localStorage.siagaHome||'null')}catch(e){}
+ const empty={ok:true,berita:[],summary:{},dash:{},cached:1};
+ if(c){c.cached=!navigator.onLine;await homeDraw(c)}else $('#m').innerHTML='<div class="card" id="vw-home">Memuat…</div>';
+ if(!navigator.onLine){if(!c)await homeDraw(empty);return}
+ const r=await api('home',{},null,2); // di latar belakang; tampilan lokal sudah muncul
+ if(r.ok){const old=localStorage.siagaHome;localStorage.siagaHome=JSON.stringify(r);if($('#vw-home')&&(!c||old!==localStorage.siagaHome||c.cached))await homeDraw(r)}
+ else if(r.net&&!c&&$('#vw-home'))await homeDraw(empty)}
+async function homeDraw(r){
+ const u=S.user,T=tm(),d=JSON.parse(JSON.stringify(r.dash||{})),Q=(await qAll()).filter(x=>x.user===u.username),hr=new Date().getHours(),sal=hr<11?'Selamat pagi':hr<15?'Selamat siang':hr<19?'Selamat sore':'Selamat malam',a=d.absen,qa=Q.filter(x=>x.a==='absen').pop();
  let st=a&&a.sedang?'🟢 Bertugas sejak '+fmt(a.ts):a&&String(a.ts).slice(0,10)===tdy()?'⚪ Terakhir '+a.tipe+' '+fmt(a.ts).slice(11):'🔴 Belum absen hari ini';if(qa)st='📴 Absen '+qa.d.tipe+' tersimpan, menunggu sinkron';
- $('#m').innerHTML=`${r.cached?'<div class="card" style="background:#fff6e0">📴 Mode offline: menampilkan data terakhir tersimpan.</div>':''}${(parseFloat(r.versi)||0)<2.5?'<div class="card" style="background:#fde8e6;font-size:13px">⚠ <b>Server (Code.gs) belum versi terbaru (v2.5).</b> Admin: tempel Code.gs terbaru, jalankan setup(), lalu Deploy → Manage deployments → New version.</div>':''}<div class="card" style="background:linear-gradient(135deg,#1558d6,#3b82f6);color:#fff;border:0"><div style="font-size:13px;opacity:.9">${sal},</div><b style="font-size:20px">${esc(u.nama)}</b><div style="font-size:13px;margin:2px 0 8px">${T.ic} ${T.n}${d.shift?' · Shift '+d.shift:''} · ${u.role}</div><div style="font-size:14px;margin-bottom:6px">${st}</div><button style="background:#fff;color:var(--b)" onclick="go('absen')">🕘 Absen IN / OUT / Permit</button></div>
+ {const ld=s=>{const x=new Date(s),p=v=>String(v).padStart(2,'0');return x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate())},pd=a=>Q.filter(x=>x.a===a&&x.st!=='rej'&&ld(x.d.ts)===tdy()).length;
+  if(u.tim==='security')d.patroli=(d.patroli||0)+pd('patroli');if(d.kerja)d.kerja.total=(d.kerja.total||0)+pd('kerja')}
+ $('#m').innerHTML=`<span id="vw-home" hidden></span>${r.cached?'<div class="card" style="background:#fff6e0">📴 Mode offline: menampilkan data terakhir tersimpan.</div>':''}${(parseFloat(r.versi)||0)<2.5?'<div class="card" style="background:#fde8e6;font-size:13px">⚠ <b>Server (Code.gs) belum versi terbaru (v2.5).</b> Admin: tempel Code.gs terbaru, jalankan setup(), lalu Deploy → Manage deployments → New version.</div>':''}<div class="card" style="background:linear-gradient(135deg,#1558d6,#3b82f6);color:#fff;border:0"><div style="font-size:13px;opacity:.9">${sal},</div><b style="font-size:20px">${esc(u.nama)}</b><div style="font-size:13px;margin:2px 0 8px">${T.ic} ${T.n}${d.shift?' · Shift '+d.shift:''} · ${u.role}</div><div style="font-size:14px;margin-bottom:6px">${st}</div><button style="background:#fff;color:var(--b)" onclick="go('absen')">🕘 Absen IN / OUT / Permit</button></div>
  ${dashHtml(d,u,T)}
  <div class="card"><b>📰 Info & Berita</b>${(r.berita||[]).map(n=>{
    const lnk = n.link ? (String(n.link).startsWith('http') ? n.link : 'https://'+n.link) : '';
@@ -150,7 +159,7 @@ async function jadwalLoad(){const r=await api('jadwalSaya',{},null,1);const L=r.
  e.innerHTML=L.length?L.map(x=>`<div class="news" style="border-color:${CL[x.shift]||'#1558d6'};font-size:13px"><b>${x.tanggal}</b>${x.tanggal===tdy()?' <span style="color:#d92d20">(hari ini)</span>':''} · ${IC[x.shift]||''} <b>${esc(x.shift)}</b> · ${x.peran}</div>`).join(''):'<small>Belum ada jadwal. Hubungi SPV (Admin, Piket).</small>';
  const k=await api('lokasiList',{},null,1),K=k.ok?k.data:JSON.parse(localStorage.siagaLok||'null');if(k.ok)localStorage.siagaLok=JSON.stringify(K);const l0=K&&K.riwayat&&K.riwayat[0],e2=$('#lk');
  if(e2)e2.innerHTML=l0?`<b>${esc(l0.lokasi)}</b><br><small style="color:var(--g)">Diperbarui ${fmt(l0.ts)}</small>`:'Belum ada lokasi bertugas. Ketuk Update Lokasi.'}
-async function abOff(b){if(!confirm('Catat hari ini sebagai jadwal OFF (libur)?'))return;await send('absen',{tipe:'OFF',ket:$('#ket')?$('#ket').value:''},b)}
+async function abOff(b){if(!confirm('Catat hari ini sebagai jadwal OFF (libur)?'))return;await sendQ('absen',{tipe:'OFF',ket:$('#ket')?$('#ket').value:''},b)}
 let lkFoto='',lkSrc='',lkG=null;
 function lokForm(){lkFoto='';lkSrc='';lkG=null;const nm=[...new Set(JSON.parse(localStorage.siagaTitik||'[]').map(x=>x.nama))];
  $('#m').innerHTML=`<div class="card"><b>📍 Update Lokasi Bertugas</b><datalist id="lkl">${nm.map(n=>`<option value="${esc(n)}">`).join('')}</datalist><input id="lk1" list="lkl" placeholder="Lokasi / pos bertugas (contoh: Pos Gerbang Utama)"><textarea id="lk2" placeholder="Catatan (opsional)"></textarea>
@@ -160,7 +169,8 @@ async function lokSubmit(b){const l=$('#lk1').value.trim();if(l.length<2)return 
  const r=await send('lokasiSet',{lokasi:l,ket:$('#lk2').value,foto:lkFoto,sumber:lkSrc,lat:g.lat,lng:g.lng},b);if(r.ok)absen()}
 async function ab(b,tipe,shift){b.classList.add('busy');try{const g=await gps();if(g.fake)return toast('⚠ Fake GPS terdeteksi');
  const d=hav(g.lat,g.lng,+cfg.lokasi_lat,+cfg.lokasi_lng);if(tipe!=='PERMIT'&&d>cfg.radius)return toast('⚠ Di luar radius ('+Math.round(d)+' m)');
- const f=await shot(g,'user');if(!f)return;await send('absen',{tipe,shift:shift||'',lat:g.lat,lng:g.lng,fake:g.fake,foto:f,ket:$('#ket')?.value||''},b)}finally{b.classList.remove('busy')}}
+ const dq=(await myQ()).find(x=>x.a==='absen'&&x.d.tipe===tipe&&x.st!=='rej'&&Date.now()-new Date(x.d.ts)<120000);if(dq)return toast('⚠ Absen '+tipe+' baru saja tersimpan di antrean. Tekan ⟳ Sinkronkan.');
+ const f=await shot(g,'user');if(!f)return;await sendQ('absen',{tipe,shift:shift||'',lat:g.lat,lng:g.lng,fake:g.fake,foto:f,ket:$('#ket')?.value||''},b)}finally{b.classList.remove('busy')}}
 function hav(a,b,c,d){const t=x=>x*Math.PI/180,q=Math.sin(t(c-a)/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(t(d-b)/2)**2;return 12742000*Math.asin(Math.sqrt(q))}
 function kerja(){if(S.user.tim==='security')return secUI();
  if(S.user.tim==='unitusaha')return usahaUI();
@@ -220,7 +230,7 @@ async function kirimKerjaKebersihan(b){
   if(!kjFotoSeb)return toast('⚠ Foto SEBELUM pekerjaan wajib diambil');
   if(!kjFotoSes)return toast('⚠ Foto SESUDAH pekerjaan wajib diambil');
   const g=kjG||await gps();
-  const r=await send('kerja',{
+  const r=await sendQ('kerja',{
     jenis:$('#jn').value,
     blok:blok,
     ket:$('#kt').value,
@@ -234,13 +244,13 @@ async function kirimKerjaKebersihan(b){
     kerja();
   }
 }
-async function kirimKerja(b){const T=tm();if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');const g=await gps();const f=await shot(g);if(f)await send('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f},b)}
+async function kirimKerja(b){const T=tm();if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');const g=await gps();const f=await shot(g);if(f){const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f},b);if(r.ok){['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''})}}}
 async function patrol(b){const g=await gps();let kode;
  if('BarcodeDetector'in window){const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}),v=document.createElement('video');v.srcObject=st;v.setAttribute('playsinline','');await v.play();const d=new BarcodeDetector({formats:['qr_code','code_128']});toast('Arahkan ke barcode…');
   for(let i=0;i<60&&!kode;i++){const r=await d.detect(v).catch(()=>[]);if(r[0])kode=r[0].rawValue;await new Promise(r=>setTimeout(r,300))}st.getTracks().forEach(t=>t.stop())}
  kode=kode||prompt('Masukkan kode titik:');if(!kode)return;const TL=JSON.parse(localStorage.siagaTitik||'[]');
  if(TL.length){const T=TL.find(t=>String(t.kode)===String(kode));if(!T)return toast('⚠ Barcode tidak dikenal');const d=hav(g.lat,g.lng,+T.lat,+T.lng);if(d>cfg.radius)return toast('⚠ Di luar radius titik ('+Math.round(d)+' m)')}
- const f=await shot(g);if(f)await send('patroli',{kode,lat:g.lat,lng:g.lng,foto:f},b)}
+ const f=await shot(g);if(f){await sendQ('patroli',{kode,lat:g.lat,lng:g.lng,foto:f},b);if(typeof patStat==='function'&&$('#hps'))patStat().then(x=>{const e=$('#hps');if(e)e.innerHTML=x.map(chip).join('')||'Belum ada titik'})}}
 let rt='Absen',rd=[],rtm='';
 // ===== Rekap: detail transaksi per user, preview + export PDF (A4 Landscape) & XLSX =====
 let rkd='',rks='',RKM=null; // diisi saat Rekap dibuka (tdy() baru tersedia setelah skrip utama dimuat)
@@ -464,12 +474,21 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 let TK=[],STF=[],tkf='aktif',tkt='',tkFoto='',tkG=null,tkSrc='';
 const tkMin=m=>m==null?'-':m>=60?Math.floor(m/60)+' j '+Math.round(m%60)+' m':Math.round(m)+' m';
 const canTk=t=>S.user.role!=='user'||S.user.tim===t.tim;
-async function tkList(){$('#m').innerHTML='<div class="card">Memuat…</div>';const r=await api('tiketList',{},null,1);let c='';
- if(r.ok){TK=r.data.tiket;STF=r.data.staff;localStorage.siagaTiket=JSON.stringify(r.data)}else if(r.net){const d=JSON.parse(localStorage.siagaTiket||'{"tiket":[],"staff":[]}');TK=d.tiket;STF=d.staff;c='📴 Offline: menampilkan data terakhir tersimpan.'}else return;tkRender(c)}
-function tkSla(t){if(!['Baru','Ditugaskan'].includes(t.status))return '';return t.telat?`<span style="color:#d92d20;font-weight:700">⏰ TERLAMBAT ditanggapi (batas ${fmt(t.batas)})</span>`:`<span style="color:var(--g)">⏱ Batas respon ${fmt(t.batas)}</span>`}
+const KTIM=(()=>{const m={};Object.keys(TJ).forEach(t=>TJ[t].forEach(k=>m[k]=t));return m})();
+function tkMerge(L,Q){const me=S.user,have=new Set(L.map(t=>t.uid)),mu={},se={};
+ Q.forEach(x=>{if(x.a==='tiketMulai')mu[x.d.id]=x.d;if(x.a==='tiketSelesai')se[x.d.id]=x.d});
+ const pend=Q.filter(x=>x.a==='tiketBuat'&&!have.has(x.uid)).map(x=>({id:'(menunggu sinkron)',uid:x.uid,ts:x.d.ts,kategori:x.d.kategori,item:x.d.item,lokasi:x.d.lokasi,deskripsi:x.d.deskripsi,prioritas:x.d.prioritas||'Sedang',status:x.d.self?'Ditugaskan':'Baru',petugas:x.d.self?me.username:'',petugasNama:x.d.self?me.nama:'',pelapor:me.username,pelaporNama:me.nama,tim:KTIM[x.d.kategori]||'maintenance',batas:'',telat:false,pending:1}));
+ return [...pend,...L].map(t=>se[t.id]?{...t,status:'Selesai',petugas:me.username,petugasNama:me.nama,catatan:se[t.id].catatan}:mu[t.id]?{...t,status:'Diproses',petugas:me.username,petugasNama:me.nama,catatan_respon:mu[t.id].catatan}:t)}
+async function tkList(){const Q=await myQ();QN=Q.length;let c=null;try{c=JSON.parse(localStorage.siagaTiket||'null')}catch(e){}
+ if(c){TK=tkMerge(c.tiket||[],Q);STF=c.staff||[];tkRender(navigator.onLine?'':'📴 Offline: menampilkan data terakhir tersimpan.')}else $('#m').innerHTML='<div class="card" id="vw-tk">Memuat…</div>';
+ if(!navigator.onLine){if(!c){TK=tkMerge([],Q);STF=[];tkRender('📴 Offline')}return}
+ const r=await api('tiketList',{},null,2); // di latar belakang
+ if(r.ok&&r.data&&Array.isArray(r.data.tiket)){localStorage.siagaTiket=JSON.stringify(r.data);const Q2=await myQ();QN=Q2.length;TK=tkMerge(r.data.tiket,Q2);STF=r.data.staff;if($('#vw-tk'))tkRender('')}
+ else if(!c&&r.net&&$('#vw-tk')){TK=tkMerge([],Q);STF=[];tkRender('📴 Belum ada koneksi.')}}
+function tkSla(t){if(t.pending)return '<span style="color:#b45309">⏳ Menunggu sinkron</span>';if(!['Baru','Ditugaskan'].includes(t.status))return '';return t.telat?`<span style="color:#d92d20;font-weight:700">⏰ TERLAMBAT ditanggapi (batas ${fmt(t.batas)})</span>`:`<span style="color:var(--g)">⏱ Batas respon ${fmt(t.batas)}</span>`}
 function tkRender(c){const tm=TIMS[S.user.tim],L=TK.filter(t=>(tkf==='aktif'?TA.includes(t.status):tkf==='selesai'?!TA.includes(t.status):true)&&(!tkt||t.tim===tkt));
  if(tkf==='aktif')L.sort((a,b)=>(PR_RANK[b.prioritas]||0)-(PR_RANK[a.prioritas]||0)||(String(a.ts)<String(b.ts)?-1:1));
- $('#m').innerHTML=`<div class="card"><b>${tm?tm.ic+' Tiket Tim '+tm.n:'🎫 Daftar Tiket'}</b>${c?`<p style="font-size:12px;margin:4px 0">${c}</p>`:''}${B('🎫 BUAT TIKET','tkForm','big')}<div class="row" style="grid-template-columns:1fr 1fr"><select onchange="tkf=this.value;tkRender()"><option value="aktif" ${tkf=='aktif'?'selected':''}>Tiket aktif</option><option value="selesai" ${tkf=='selesai'?'selected':''}>Selesai / ditutup</option><option value="semua" ${tkf=='semua'?'selected':''}>Semua</option></select><select onchange="tkt=this.value;tkRender()"><option value="">Semua tim</option>${Object.keys(TIMS).map(k=>`<option value="${k}" ${tkt==k?'selected':''}>${TIMS[k].ic} ${TIMS[k].n}</option>`).join('')}</select></div>${tkf==='aktif'?'<small style="color:var(--g)">Urutan: prioritas tertinggi dan tiket terlama di atas. Tanggapi sesuai urutan.</small>':''}</div>${L.map(t=>`<div class="card" onclick="tkDetail('${t.id}')" style="cursor:pointer;${t.telat?'border-left:4px solid #d92d20':''}"><div style="display:flex;justify-content:space-between"><b>${t.id}</b><span style="color:#fff;background:${PC[t.prioritas]||'#6b7a90'};border-radius:10px;padding:1px 8px;font-size:11px">${t.prioritas}</span></div><div style="font-size:12px;color:var(--g)">${(TIMS[t.tim]||{}).ic||''} Tim ${(TIMS[t.tim]||{}).n||t.tim}</div><div style="font-size:13px">${esc(t.kategori)} · ${esc(t.item)}</div><div style="font-size:13px;color:var(--g)">📍 ${esc(t.lokasi)}</div><div style="font-size:12px;margin-top:4px">Status: <b>${t.status}</b>${t.petugasNama?' · '+esc(t.petugasNama):''}</div><div style="font-size:12px;margin-top:2px">${tkSla(t)}</div></div>`).join('')||'<div class="card">Tidak ada tiket.</div>'}${TIMS[S.user.tim]?'':B('← Beranda','home','o')}`}
+ $('#m').innerHTML=`<div class="card" id="vw-tk"><b>${tm?tm.ic+' Tiket Tim '+tm.n:'🎫 Daftar Tiket'}</b>${c?`<p style="font-size:12px;margin:4px 0">${c}</p>`:''}${B('🎫 BUAT TIKET','tkForm','big')}${qbar()}<div class="row" style="grid-template-columns:1fr 1fr"><select onchange="tkf=this.value;tkRender()"><option value="aktif" ${tkf=='aktif'?'selected':''}>Tiket aktif</option><option value="selesai" ${tkf=='selesai'?'selected':''}>Selesai / ditutup</option><option value="semua" ${tkf=='semua'?'selected':''}>Semua</option></select><select onchange="tkt=this.value;tkRender()"><option value="">Semua tim</option>${Object.keys(TIMS).map(k=>`<option value="${k}" ${tkt==k?'selected':''}>${TIMS[k].ic} ${TIMS[k].n}</option>`).join('')}</select></div>${tkf==='aktif'?'<small style="color:var(--g)">Urutan: prioritas tertinggi dan tiket terlama di atas. Tanggapi sesuai urutan.</small>':''}</div>${L.map(t=>`<div class="card" onclick="tkDetail('${t.id}')" style="cursor:pointer;${t.telat?'border-left:4px solid #d92d20':''}"><div style="display:flex;justify-content:space-between"><b>${t.id}</b><span style="color:#fff;background:${PC[t.prioritas]||'#6b7a90'};border-radius:10px;padding:1px 8px;font-size:11px">${t.prioritas}</span></div><div style="font-size:12px;color:var(--g)">${(TIMS[t.tim]||{}).ic||''} Tim ${(TIMS[t.tim]||{}).n||t.tim}</div><div style="font-size:13px">${esc(t.kategori)} · ${esc(t.item)}</div><div style="font-size:13px;color:var(--g)">📍 ${esc(t.lokasi)}</div><div style="font-size:12px;margin-top:4px">Status: <b>${t.status}</b>${t.petugasNama?' · '+esc(t.petugasNama):''}</div><div style="font-size:12px;margin-top:2px">${tkSla(t)}</div></div>`).join('')||'<div class="card">Tidak ada tiket.</div>'}${TIMS[S.user.tim]?'':B('← Beranda','home','o')}`}
 function tkDetail(id){const t=TK.find(x=>x.id===id);if(!t)return;const me=S.user,adm=me.role!=='user',ok=canTk(t),own=t.petugas===me.username,fl=(l,u)=>/^https?:\/\//.test(u||'')?`<a href="${esc(u)}" target=_blank rel="noopener noreferrer">${l}</a> `:`<span style="color:var(--g)">${l}: belum ada</span> `;let a='';const tm=TIMS[t.tim]||{n:t.tim,ic:''};
  if(ok&&['Baru','Ditugaskan'].includes(t.status)&&(!t.petugas||own||adm))a+=`<p style="font-size:12px;color:var(--g);margin:8px 0 4px">Wajib: tanggapan awal + foto SEBELUM (kamera langsung).</p><textarea id="tkr" placeholder="Tanggapan awal / rencana penanganan (wajib)"></textarea><button onclick="tkMulai(this,'${id}')"><span class="sp"></span>▶ Tanggapi & Mulai (Foto Sebelum)</button>`;
  if(ok&&(own||adm)&&t.status==='Diproses')a+=`<p style="font-size:12px;color:var(--g);margin:8px 0 4px">Wajib: catatan penyelesaian + foto SESUDAH (kamera langsung).</p><textarea id="tkc" placeholder="Catatan penyelesaian (wajib)"></textarea><button onclick="tkSelesai(this,'${id}')"><span class="sp"></span>✔ Selesai (Foto Sesudah)</button>`;
@@ -477,13 +496,16 @@ function tkDetail(id){const t=TK.find(x=>x.id===id);if(!t)return;const me=S.user
  if(adm&&['Baru','Ditugaskan'].includes(t.status)&&sf.length)a+=`<select id="tkp">${sf.map(s=>`<option value="${s.username}" ${s.username==t.petugas?'selected':''}>${esc(s.nama)}</option>`).join('')}</select><button class="o" onclick="tkUbah(this,'${id}',{petugas:$('#tkp').value})"><span class="sp"></span>👤 Tugaskan</button>`;
  if(adm&&t.status==='Selesai')a+=`<button class="o" onclick="tkUbah(this,'${id}',{status:'Ditutup'})"><span class="sp"></span>🔒 Tutup Tiket</button>`;
  if(adm&&!['Selesai','Ditutup','Dibatalkan'].includes(t.status))a+=`<button class="r" onclick="if(confirm('Batalkan tiket ini?'))tkUbah(this,'${id}',{status:'Dibatalkan'})"><span class="sp"></span>✖ Batalkan</button>`;
+ if(t.pending)a='<p style="font-size:12px;color:#b45309;margin:8px 0">⏳ Tiket menunggu sinkron. Aksi tersedia setelah tiket terkirim (otomatis ≤3 menit atau tekan ⟳ Sinkronkan di daftar tiket).</p>';
  $('#m').innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between"><b>${t.id}</b><span style="color:#fff;background:${PC[t.prioritas]||'#6b7a90'};border-radius:10px;padding:1px 8px;font-size:11px">${t.prioritas}</span></div>
  <p style="margin:6px 0"><b>${esc(t.kategori)} · ${esc(t.item)}</b><br>${tm.ic} Tim ${tm.n}<br>📍 ${esc(t.lokasi)}</p><p style="margin:6px 0;font-size:14px">${esc(t.deskripsi)}</p>
  <div style="font-size:12px;color:var(--g)">Status: <b style="color:var(--t)">${t.status}</b><br>Pelapor: ${esc(t.pelaporNama)} · ${fmt(t.ts)}<br>Batas respon (${SLA_TXT[t.prioritas]||''}): ${fmt(t.batas)}${t.respon!=null?'<br>Ditanggapi dalam: <b style="color:'+(t.respon<=t.sla?'#12805c':'#d92d20')+'">'+tkMin(t.respon)+(t.respon<=t.sla?' (tepat waktu)':' (terlambat)')+'</b>':t.telat?'<br><b style="color:#d92d20">⏰ Belum ditanggapi, melewati batas respon</b>':''}<br>Petugas: ${esc(t.petugasNama)||'-'}${t.ts_mulai?'<br>Mulai: '+fmt(t.ts_mulai):''}${t.ts_selesai?'<br>Selesai: '+fmt(t.ts_selesai):''}${t.catatan_respon?'<br>Tanggapan awal: <span style="color:var(--t)">'+esc(t.catatan_respon)+'</span>':''}${t.catatan?'<br>Catatan penyelesaian: <span style="color:var(--t)">'+esc(t.catatan)+'</span>':''}</div>
  <div style="margin:8px 0;line-height:1.9">${t.foto_lapor?fl('📷 Foto kondisi'+(t.sumber_lapor==='galeri'?' (galeri)':''),t.foto_lapor):''}${fl('📷 Foto SEBELUM',t.foto_sebelum)}${fl('📷 Foto SESUDAH',t.foto_sesudah)}</div>${a}${B('← Kembali','tkBack','o')}</div>`}
 function tkBack(){TIMS[S.user.tim]?tkList():home()}
-async function tkMulai(b,id){const c=($('#tkr')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi tanggapan awal terlebih dahulu');const p=await getFoto('kamera');if(!p)return;const r=await send('tiketMulai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng},b);if(r.ok){if(r.queued)tkLocal(id,{status:'Diproses',petugas:S.user.username,petugasNama:S.user.nama,catatan_respon:c});tkList()}}
-async function tkSelesai(b,id){const c=($('#tkc')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi catatan penyelesaian terlebih dahulu');const p=await getFoto('kamera');if(!p)return;const r=await send('tiketSelesai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng},b);if(r.ok){if(r.queued)tkLocal(id,{status:'Selesai',catatan:c});tkList()}}
+async function tkMulai(b,id){const c=($('#tkr')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi tanggapan awal terlebih dahulu');
+ const t0=TK.find(x=>x.id===id);if(t0&&S.user.role==='user'){const hi=TK.find(x=>x.id!==id&&!x.pending&&x.tim===t0.tim&&['Baru','Ditugaskan'].includes(x.status)&&(!x.petugas||x.petugas===S.user.username)&&(PR_RANK[x.prioritas]||2)>(PR_RANK[t0.prioritas]||2));if(hi)return toast('⚠ Tanggapi dulu tiket prioritas lebih tinggi: '+hi.id+' ('+hi.prioritas+')')}
+ const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketMulai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng});if(r.ok)tkList()}
+async function tkSelesai(b,id){const c=($('#tkc')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi catatan penyelesaian terlebih dahulu');const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketSelesai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng});if(r.ok)tkList()}
 function tkLocal(id,o){const t=TK.find(x=>x.id===id);if(t){Object.assign(t,o);localStorage.siagaTiket=JSON.stringify({tiket:TK,staff:STF})}}
 async function tkUbah(b,id,o){const r=await api('tiketUbah',{id,...o},b);if(r.ok)tkList()}
 function tkForm(){tkFoto='';tkG=null;tkSrc='';const def=TIMS[S.user.tim]?S.user.tim:'maintenance';
@@ -498,8 +520,8 @@ async function tkSnap(b,src){const p=await getFoto(src);if(p){tkFoto=p.f;tkG=p.g
 function ov(on,t){const e=$('#ov');if(!e)return;e.style.display=on?'flex':'none';if(on)e.innerHTML=`<div class="ring"></div><p class="dots" style="margin-top:18px;font-weight:700;color:var(--b);font-size:17px">${t}</p><small style="color:var(--g)">Jangan tutup aplikasi</small>`}
 function ovOk(t){const e=$('#ov');if(!e)return;e.style.display='flex';e.innerHTML=`<svg class="chk" width="84" height="84" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#12805c" stroke-width="3"/><path d="M14 27l8 8 16-17" fill="none" stroke="#12805c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="margin-top:14px;font-weight:700;color:#12805c;font-size:17px">${t}</p>`;setTimeout(()=>ov(false),1300)}
 async function tkSubmit(b){const l=$('#tk3').value.trim(),d=$('#tk4').value.trim();if(!l||!d)return toast('⚠ Isi lokasi dan deskripsi');ov(true,'Membuat tiket');
- try{const g=tkG||await gps(),r=await send('tiketBuat',{kategori:$('#tk1').value,item:$('#tk2').value,lokasi:l,deskripsi:d,prioritas:$('#tk5').value,self:$('#tk6w').style.display!=='none'&&$('#tk6').checked,foto:tkFoto,sumber:tkSrc,lat:g.lat,lng:g.lng},null);
-  if(r.ok){ovOk(r.queued?'Tersimpan, dikirim saat online':'Tiket diteruskan ke Tim '+TIMS[$('#tk0').value].n);await new Promise(z=>setTimeout(z,1300));tkBack()}else ov(false)}catch(e){ov(false)}}
+ try{const g=tkG||await gps(),r=await sendQ('tiketBuat',{kategori:$('#tk1').value,item:$('#tk2').value,lokasi:l,deskripsi:d,prioritas:$('#tk5').value,self:$('#tk6w').style.display!=='none'&&$('#tk6').checked,foto:tkFoto,sumber:tkSrc,lat:g.lat,lng:g.lng});
+  if(r.ok){ovOk('Tiket tersimpan. Terkirim ke Tim '+TIMS[$('#tk0').value].n+' otomatis ≤3 menit');await new Promise(z=>setTimeout(z,900));tkBack()}else ov(false)}catch(e){ov(false)}}
 async function lMt(){const r=await api('sumTiket',{tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,hr=lpm==='hari',H=hr?d.harian:d.bulanan,du=m=>m?(m>=60?Math.floor(m/60)+' j '+Math.round(m%60)+' m':Math.round(m)+' m'):'-';
  let h=`<b>Tiket Layanan ${hr?d.tanggal:d.bulan}</b>`+stat([['Dibuat',H.dibuat],['Selesai',H.selesai],['Rata-rata durasi',du(H.avgMenit)],['Masih terbuka',d.terbuka]])
@@ -609,7 +631,7 @@ async function tamuUI(){const Q=await myQ();QN=Q.length;let L=null;try{L=JSON.pa
  if(L){TM=tamuMerge(L,Q);tamuRender(navigator.onLine?'':'📴 Offline: menampilkan data tersimpan di HP.')}else $('#sc').innerHTML='<div id="vw-tamu"><div class="card">Memuat…</div></div>';
  if(!navigator.onLine){if(!L){TM=tamuMerge([],Q);tamuRender('📴 Offline')}return}
  const r=await api('tamuList',{},null,2); // di latar belakang; tampilan lokal sudah muncul lebih dulu
- if(r.ok){localStorage.siagaTamu=JSON.stringify(r.data);const Q2=await myQ();QN=Q2.length;TM=tamuMerge(r.data,Q2);if($('#vw-tamu'))tamuRender('')}
+ if(r.ok&&Array.isArray(r.data)){localStorage.siagaTamu=JSON.stringify(r.data);const Q2=await myQ();QN=Q2.length;TM=tamuMerge(r.data,Q2);if($('#vw-tamu'))tamuRender('')}
  else if(!L&&r.net&&$('#vw-tamu')){TM=tamuMerge([],Q);tamuRender('📴 Belum ada koneksi.')}}
 function tamuRender(c){const dl=TM.filter(t=>t.status==='Di dalam'),hr=TM.filter(t=>t.status!=='Di dalam'),
  card=t=>`<div class="news" onclick="tamuDetail('${t.uid}')" style="cursor:pointer;font-size:13px"><b>${esc(t.nama)}</b> · ${esc(t.keperluan)}${t.kartu?' · 🪪 '+esc(t.kartu):''}<br><small>→ ${esc(t.tujuan)} · masuk ${jm(t.ts)}${t.status==='Keluar'?' · keluar '+(String(t.ts_keluar).includes('menunggu')?'(sinkron)':jm(t.ts_keluar)):''}${t.pending?' · ⏳ menunggu sinkron':''}</small></div>`;
@@ -650,7 +672,7 @@ async function kgUI(){const Q=await myQ();QN=Q.length;let L=null;try{L=JSON.pars
  if(L){KG=kgMerge(L,Q);kgRender(navigator.onLine?'':'📴 Offline: menampilkan data tersimpan di HP.')}else $('#sc').innerHTML='<div id="vw-kg"><div class="card">Memuat…</div></div>';
  if(!navigator.onLine){if(!L){KG=kgMerge([],Q);kgRender('📴 Offline')}return}
  const r=await api('kgList',{},null,2);
- if(r.ok){localStorage.siagaKg=JSON.stringify(r.data);const Q2=await myQ();QN=Q2.length;KG=kgMerge(r.data,Q2);if($('#vw-kg'))kgRender('')}
+ if(r.ok&&Array.isArray(r.data)){localStorage.siagaKg=JSON.stringify(r.data);const Q2=await myQ();QN=Q2.length;KG=kgMerge(r.data,Q2);if($('#vw-kg'))kgRender('')}
  else if(!L&&r.net&&$('#vw-kg')){KG=kgMerge([],Q);kgRender('📴 Belum ada koneksi.')}}
 function kgRender(c){const B1=KG.filter(k=>k.status==='Berlangsung'),B2=KG.filter(k=>k.status==='Terjadwal').sort((a,b)=>String(a.mulai)<String(b.mulai)?-1:1),B3=KG.filter(k=>k.status==='Selesai'||k.status==='Dibatalkan'),
  card=k=>`<div class="news" onclick="kgDetail('${k.uid}')" style="cursor:pointer;font-size:13px">${KGJ[k.jenis]||'📌'} <b>${esc(k.nama)}</b> · ${esc(k.jenis)}<br><small>📍 ${esc(k.lokasi)} · ${kgt(k.mulai)} – ${kgt(k.selesai)}${k.status==='Dibatalkan'?' · dibatalkan':''}${k.pending?' · ⏳ menunggu sinkron':''}</small></div>`;
@@ -697,7 +719,7 @@ async function send(a,d,btn){const it={uid:uid(),a,d:{...d,ts:new Date().toISOSt
  if(navigator.onLine){const r=await api(a,{...it.d,uid:it.uid},btn,1);if(!r.net&&!r.expired)return r}
  it.d.off=1;await qPut(it);badge();toast(a==='darurat'?'🚨 Darurat tersimpan, dikirim otomatis saat ada sinyal':'📴 Tersimpan di HP, dikirim otomatis saat online');return{ok:true,queued:true}}
 // Offline-first: simpan ke antrean HP lebih dulu (instan), dikirim otomatis tiap 3 menit bila ada antrean, atau tombol Sinkronkan
-async function sendQ(a,d){const it={uid:uid(),a,d:{...d,ts:new Date().toISOString()},user:S.user.username,st:'wait'};if(!navigator.onLine)it.d.off=1;await qPut(it);badge();toast('💾 Tersimpan di HP. Terkirim otomatis ≤3 menit atau tekan ⟳ Sinkronkan');return{ok:true,queued:true}}
+async function sendQ(a,d,b){if(b){b.disabled=true;setTimeout(()=>{b.disabled=false},1500)}const it={uid:uid(),a,d:{...d,ts:new Date().toISOString()},user:S.user.username,st:'wait'};if(!navigator.onLine)it.d.off=1;await qPut(it);badge();toast('💾 Tersimpan di HP. Terkirim otomatis ≤3 menit atau tekan ⟳ Sinkronkan');return{ok:true,queued:true}}
 async function badge(){if(!S||!$('#sn'))return;let n=0;try{n=(await qAll()).filter(x=>x.user===S.user.username).length}catch(e){}$('#sn').textContent=(navigator.onLine?'':'📴 ')+'⟳'+(n?' '+n:'')}
 let syncFail=0,syncNext=0;
 async function sync(btn,auto){if(syncing||!S)return;
@@ -712,7 +734,7 @@ async function sync(btn,auto){if(syncing||!S)return;
  if(stop==='old'){toast('⚠ Server belum diperbarui (Code.gs). Data tetap tersimpan di HP.');return}
  if(stop==='exp'){toast('🔐 Sesi habis. Login ulang untuk sinkronisasi');logout();return}
  if(ok||bad||!auto)toast(stop==='net'?'📴 Belum ada koneksi, data tetap tersimpan':ok||bad?`✔ ${ok} data tersinkron${bad?`, ⚠ ${bad} ditolak`:''}`:'✔ Tidak ada data untuk disinkronkan');
- if(ok||bad){if($('#vw-tamu'))tamuUI();else if($('#vw-kg'))kgUI()}
+ if(ok||bad){if($('#vw-tamu'))tamuUI();else if($('#vw-kg'))kgUI();else if($('#vw-tk'))tkList()}
  if(tab==='home'&&(ok||bad))home()}
 async function qrm(u){if(!confirm('Hapus data yang ditolak ini?'))return;await qDel(u);badge();home()}
 function offInit(){$('#sy').style.display='flex';$('#ac').style.display='flex';badge();navigator.storage&&navigator.storage.persist&&navigator.storage.persist();
