@@ -84,6 +84,20 @@ table.rp-t tbody tr:nth-child(even) td{background:#f5f8fd}table.rp-t tr.rp-foot 
 .pvr{display:none;text-align:center;margin-top:8px;animation:pvf .3s}.pvr p{margin:6px 0 12px;font-size:14px}
 .ckc{stroke-dasharray:158;stroke-dashoffset:158;animation:ckd .6s .05s forwards}.ckm{stroke-dasharray:50;stroke-dashoffset:50;animation:ckd .35s .5s forwards}@keyframes ckd{to{stroke-dashoffset:0}}
 
+button{position:relative;overflow:hidden}
+.bbar{position:absolute;left:0;bottom:0;height:4px;width:38%;background:rgba(255,255,255,.8);border-radius:4px;animation:bbar 1.05s ease-in-out infinite}
+button.o .bbar{background:#1558d6}@keyframes bbar{0%{left:-38%}100%{left:100%}}
+button.proc,button.big.proc{pointer-events:none;background:linear-gradient(90deg,#1558d6,#3b82f6,#1558d6);background-size:200% 100%;animation:bshim 1.3s linear infinite;box-shadow:0 4px 14px rgba(21,88,214,.35)}
+button.o.proc{background:#e8f0ff;animation:none;color:#1558d6}
+.bsp{width:18px;height:18px;flex:none;border:2.5px solid #fff6;border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite}button.o .bsp{border-color:#1558d655;border-top-color:#1558d6}
+.btx{animation:btx .22s}@keyframes btx{from{transform:translateY(5px)}}
+button.okk,button.big.okk{pointer-events:none;background:#12805c!important;color:#fff!important;animation:bpop .35s;box-shadow:0 4px 14px rgba(18,128,92,.4)}
+button.errb,button.big.errb{pointer-events:none;background:#d92d20!important;color:#fff!important;animation:bshake .4s}
+.bck{display:inline-block;font-size:18px;font-weight:700;animation:bpop .4s}
+@keyframes bshim{to{background-position:-200% 0}}@keyframes bpop{from{transform:scale(.7);opacity:.5}}@keyframes bshake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.ufpv{display:flex;gap:10px;align-items:center;margin:4px 0 6px}.ufpv img{width:74px;height:74px;object-fit:cover;border-radius:10px;border:1px solid var(--bd)}.ufpv small{display:block;color:#12805c;font-weight:700;margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){.bbar,.bsp,button.proc{animation-duration:2.4s}}
+
 @media print{header,nav,.np{display:none}}
 </style></head><body>
 <header><div class="logo" id="lg">S</div><div><b>SIAGA</b><small>Respect, Respon, Report, Reaction</small></div>
@@ -249,7 +263,7 @@ function genHtml(T){
       ${B('📨 Kirim Laporan Pekerjaan','kirimKerjaKebersihan','big')}
     </div>`;
   }
-  return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${B('📷 Foto & Kirim','kirimKerja')}</div>`;
+  return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${S.user.tim==='unitusaha'?usFotoBox():''}${B(S.user.tim==='unitusaha'?'💾 Simpan Laporan':'📷 Foto & Kirim','kirimKerja')}</div>`;
 }
 async function kjSnap(b,w){
   b.classList.add('busy');
@@ -267,22 +281,28 @@ async function kirimKerjaKebersihan(b){
   if(!blok)return toast('⚠ Isi lokasi pekerjaan (Blok / area)');
   if(!kjFotoSeb)return toast('⚠ Foto SEBELUM pekerjaan wajib diambil');
   if(!kjFotoSes)return toast('⚠ Foto SESUDAH pekerjaan wajib diambil');
-  const g=kjG||await gps();
-  const r=await sendQ('kerja',{
-    jenis:$('#jn').value,
-    blok:blok,
-    ket:$('#kt').value,
-    lat:g.lat,
-    lng:g.lng,
-    foto:kjFotoSes,
-    foto_sebelum:kjFotoSeb
-  },b);
-  if(r.ok){
-    kjFotoSeb=''; kjFotoSes='';
-    kerja();
-  }
+  const P=btnProc(b,'Mengambil lokasi…');
+  try{
+    const g=kjG||await gps();
+    P.text('Menyimpan laporan…');await slp(350);
+    const r=await sendQ('kerja',{jenis:$('#jn').value,blok:blok,ket:$('#kt').value,lat:g.lat,lng:g.lng,foto:kjFotoSes,foto_sebelum:kjFotoSeb});
+    if(!r.ok)return P.fail('Gagal menyimpan');
+    await P.ok('Laporan tersimpan',true);
+    kjFotoSeb='';kjFotoSes='';kerja();
+  }catch(e){P.fail('Gagal, coba lagi')}
 }
-async function kirimKerja(b){const T=tm();if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');const g=await gps();const f=await shot(g);if(f){const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f},b);if(r.ok){['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''})}}}
+async function kirimKerja(b){const T=tm(),uu=isUU();
+ if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');
+ const P=btnProc(b,'Mengambil lokasi…');
+ try{const g=(uu&&usG)?usG:await gps();let f='';
+  if(uu)f=usF||''; // Unit Usaha: foto opsional
+  else{P.text('Menyiapkan kamera…');f=await shot(g);if(!f)return P.end()}
+  P.text('Menyimpan laporan…');await slp(300);
+  const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f});
+  if(!r.ok)return P.fail('Gagal menyimpan');
+  ['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''});if(uu){usF='';usG=null;usFotoRender()}
+  await P.ok('Laporan tersimpan')}
+ catch(e){P.fail('Gagal, coba lagi')}}
 // ===== Patroli: pilih Scan QR (preview kamera) atau Input Kode Titik + progres submit beranimasi =====
 let pm=localStorage.siagaPatMode||'scan',PSC=null,pgp=null,pgt=0;
 const slp=ms=>new Promise(r=>setTimeout(r,ms));
@@ -561,7 +581,7 @@ async function lPat(){const r=await api('sumPatroli',{tanggal:ltg,bulan:lbln},nu
 let um='sampah';
 const katList=k=>JSON.parse(localStorage.siagaKat||'[]').filter(x=>x.kategori===k);
 const rp=n=>'Rp '+Math.round(+n||0).toLocaleString('id-ID');
-function usahaUI(){const tabs=[['sampah','♻ Sampah'],['air','💧 Air'],['gas','🔥 Gas'],['lain','📝 Lain']];
+function usahaUI(){usF='';usG=null;const tabs=[['sampah','♻ Sampah'],['air','💧 Air'],['gas','🔥 Gas'],['lain','📝 Lain']];
  $('#m').innerHTML=`<div class="card"><div class="row" style="grid-template-columns:repeat(4,1fr)">${tabs.map(t=>`<button class="${um===t[0]?'':'o'}" style="padding:8px 2px;font-size:12px" onclick="um='${t[0]}';usahaUI()">${t[1]}</button>`).join('')}</div></div><div id="uf"></div>`;
  um==='lain'?$('#uf').innerHTML=genHtml(tm()):trxForm(um)}
 function trxForm(k){const L=katList(k),s=k==='sampah',jd={sampah:'♻ Pengumpulan Sampah Non Organik',air:'💧 Penjualan Air Mineral',gas:'🔥 Penjualan Gas'}[k];
@@ -569,11 +589,33 @@ function trxForm(k){const L=katList(k),s=k==='sampah',jd={sampah:'♻ Pengumpula
  <div class="stat" style="text-align:left;margin:6px 0">Harga satuan: <b id="uh" style="display:inline;font-size:16px"></b></div>
  <input id="uq" type="number" inputmode="decimal" min="0" step="${s?'0.01':'1'}" placeholder="${s?'Berat hasil penimbangan (kg)':'Jumlah terjual'}" oninput="hitung()">
  <div class="stat" style="text-align:left;margin:6px 0">Total: <b id="ut" style="display:inline;font-size:18px">Rp 0</b></div>
- <textarea id="ukt" placeholder="${s?'Asal setoran (blok / nama)':'Pembeli (blok / no. rumah / nama)'}"></textarea>${B(s?'📷 Foto Timbangan & Simpan':'📷 Foto & Simpan','kirimUsaha')}</div>`
+ <textarea id="ukt" placeholder="${s?'Asal setoran (blok / nama)':'Pembeli (blok / no. rumah / nama)'}"></textarea>${usFotoBox()}${B('💾 Simpan Transaksi','kirimUsaha')}</div>`
  :'<div class="card">Katalog harga belum tersedia. Minta Admin mengisi Admin → Katalog, lalu buka aplikasi saat online.</div>';if(L.length)hitung()}
 function hitung(){const x=katList(um)[$('#uj').value],q=parseFloat($('#uq').value)||0;$('#uh').textContent=rp(x.harga)+' / '+x.satuan;$('#ut').textContent=rp(q*x.harga)}
+// ===== Animasi proses pada tombol submit =====
+function btnProc(b,t){if(!b||!b.classList)return{text(){},async ok(){},async fail(){},end(){}};if(b._p)return b._p;
+ const orig=b.innerHTML,set=x=>{b.innerHTML='<span class="bsp"></span><span class="btx">'+x+'</span><i class="bbar"></i>'};
+ b.disabled=true;b.classList.add('proc');set(t||'Memproses…');
+ const P=b._p={text:set,
+  async ok(x,keep){b.classList.remove('proc');b.classList.add('okk');b.innerHTML='<span class="bck">✔</span><span class="btx">'+(x||'Tersimpan')+'</span>';await slp(keep?700:1000);if(!keep)P.end()},
+  async fail(x){b.classList.remove('proc');b.classList.add('errb');b.innerHTML='<span class="bck">✕</span><span class="btx">'+(x||'Gagal')+'</span>';await slp(1200);P.end()},
+  end(){b.classList.remove('proc','okk','errb');b.innerHTML=orig;b.disabled=false;b._p=null}};return P}
+// ===== Unit Usaha: foto opsional =====
+let usF='',usG=null;
+const isUU=()=>S.user.tim==='unitusaha';
+function usFotoInner(){return usF?`<div class="ufpv"><img src="${usF}" alt="Foto bukti"><div><small>✔ Foto terlampir</small><button class="o" style="width:auto;padding:8px 14px" onclick="usFotoDel()">✕ Hapus foto</button></div></div><button class="o" onclick="usSnap(this)"><span class="sp"></span>🔄 Ganti Foto</button>`:`<button class="o" onclick="usSnap(this)"><span class="sp"></span>📷 Ambil Foto (opsional)</button>`}
+const usFotoBox=()=>`<label style="font-size:12px;color:var(--g)">Foto bukti / timbangan <b>(opsional)</b></label><div id="ufc">${usFotoInner()}</div>`;
+function usFotoRender(){const e=$('#ufc');if(e)e.innerHTML=usFotoInner()}
+function usFotoDel(){usF='';usG=null;usFotoRender()}
+async function usSnap(b){b.classList.add('busy');try{const g=await gps(),f=await shot(g);if(f){usF=f;usG=g;usFotoRender()}}catch(e){}finally{b.classList.remove('busy')}}
 async function kirimUsaha(b){const x=katList(um)[$('#uj').value],q=parseFloat($('#uq').value);if(!(q>0))return toast('⚠ Isi '+(um==='sampah'?'berat':'jumlah')+' dengan benar');if(um!=='sampah'&&!Number.isInteger(q))return toast('⚠ Jumlah harus bilangan bulat');
- const g=await gps(),f=await shot(g);if(f){const r=await send('usaha',{kategori:um,jenis:x.jenis,satuan:x.satuan,harga:+x.harga,qty:q,ket:$('#ukt').value,lat:g.lat,lng:g.lng,foto:f},b);if(r.ok){$('#uq').value='';$('#ukt').value='';hitung()}}}
+ const P=btnProc(b,'Mengambil lokasi…');
+ try{const g=usG||await gps();P.text('Menyimpan transaksi…');
+  const [r]=await Promise.all([send('usaha',{kategori:um,jenis:x.jenis,satuan:x.satuan,harga:+x.harga,qty:q,ket:$('#ukt').value,lat:g.lat,lng:g.lng,foto:usF||''}),slp(450)]); // minimal 0,45 dtk agar animasi terlihat
+  if(!r.ok)return P.fail('Gagal menyimpan');
+  $('#uq').value='';$('#ukt').value='';usF='';usG=null;usFotoRender();hitung();
+  await P.ok(r.queued?'Tersimpan di HP':'Transaksi tersimpan')}
+ catch(e){P.fail('Gagal, coba lagi')}}
 async function usRep(mode){const r=await api('sumUsaha',{mode,tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,smp=mode==='sampah',hr=lpm==='hari',H=hr?d.harian:d.bulanan,kt={air:'Air Mineral',gas:'Gas'};
  let h=`<b>${smp?'Pengumpulan Sampah Non Organik':'Penjualan Air Mineral & Gas'} ${hr?d.tanggal:d.bulan}</b>`+stat(smp?[['Total berat (kg)',H.qty],['Nilai',rp(H.total)],['Transaksi',H.trx]]:[['Omzet',rp(H.total)],['Transaksi',H.trx]]);
