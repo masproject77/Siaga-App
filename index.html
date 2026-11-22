@@ -217,8 +217,8 @@ function lokForm(){lkFoto='';lkSrc='';lkG=null;const nm=[...new Set(JSON.parse(l
  $('#m').innerHTML=`<div class="card"><b>📍 Update Lokasi Bertugas</b><datalist id="lkl">${nm.map(n=>`<option value="${esc(n)}">`).join('')}</datalist><input id="lk1" list="lkl" placeholder="Lokasi / pos bertugas (contoh: Pos Gerbang Utama)"><textarea id="lk2" placeholder="Catatan (opsional)"></textarea>
 <label style="font-size:12px;color:var(--g)">Foto selfie / swa foto (wajib)</label><div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="lkSnap(this,'kamera')">🤳 Selfie Kamera</button><button class="o" onclick="lkSnap(this,'galeri')">🖼 Upload dari Galeri</button></div><div id="lkfs" style="font-size:12px;color:var(--g)">Belum ada foto</div>${B('💾 Simpan Lokasi','lokSubmit')}${B('Batal','absen','o')}</div>`}
 async function lkSnap(b,src){const p=await getFoto(src,'user');if(p){lkFoto=p.f;lkG=p.g;lkSrc=src;$('#lkfs').textContent='✔ Selfie terlampir ('+src+')'}}
-async function lokSubmit(b){const l=$('#lk1').value.trim();if(l.length<2)return toast('⚠ Isi lokasi bertugas');if(!lkFoto)return toast('⚠ Selfie wajib (kamera atau galeri)');const g=lkG||await gps();
- const r=await send('lokasiSet',{lokasi:l,ket:$('#lk2').value,foto:lkFoto,sumber:lkSrc,lat:g.lat,lng:g.lng},b);if(r.ok)absen()}
+async function lokSubmit(b){const l=$('#lk1').value.trim();if(l.length<2)return toast('⚠ Isi lokasi bertugas');if(!lkFoto)return toast('⚠ Selfie wajib (kamera atau galeri)');
+ const r=await send('lokasiSet',{lokasi:l,ket:$('#lk2').value,foto:lkFoto,sumber:lkSrc},b);if(r.ok)absen()}
 async function ab(b,tipe,shift){b.classList.add('busy');try{const g=await gps();if(g.fake)return toast('⚠ Fake GPS terdeteksi');
  const d=hav(g.lat,g.lng,+cfg.lokasi_lat,+cfg.lokasi_lng);if(tipe!=='PERMIT'&&d>cfg.radius)return toast('⚠ Di luar radius ('+Math.round(d)+' m)');
  const dq=(await myQ()).find(x=>x.a==='absen'&&x.d.tipe===tipe&&x.st!=='rej'&&Date.now()-new Date(x.d.ts)<120000);if(dq)return toast('⚠ Absen '+tipe+' baru saja tersimpan di antrean. Tekan ⟳ Sinkronkan.');
@@ -268,9 +268,8 @@ function genHtml(T){
 async function kjSnap(b,w){
   b.classList.add('busy');
   try{
-    const g=await gps(), f=await shot(g);
+    const f=await shot(null);
     if(f){
-      kjG=g;
       if(w==='seb'){kjFotoSeb=f;$('#kjfs1').innerHTML='Status foto sebelum: <b style="color:#12805c">✔ Terlampir</b>';}
       else{kjFotoSes=f;$('#kjfs2').innerHTML='Status foto sesudah: <b style="color:#12805c">✔ Terlampir</b>';}
     }
@@ -281,11 +280,10 @@ async function kirimKerjaKebersihan(b){
   if(!blok)return toast('⚠ Isi lokasi pekerjaan (Blok / area)');
   if(!kjFotoSeb)return toast('⚠ Foto SEBELUM pekerjaan wajib diambil');
   if(!kjFotoSes)return toast('⚠ Foto SESUDAH pekerjaan wajib diambil');
-  const P=btnProc(b,'Mengambil lokasi…');
+  const P=btnProc(b,'Menyimpan laporan…');
   try{
-    const g=kjG||await gps();
     P.text('Menyimpan laporan…');await slp(350);
-    const r=await sendQ('kerja',{jenis:$('#jn').value,blok:blok,ket:$('#kt').value,lat:g.lat,lng:g.lng,foto:kjFotoSes,foto_sebelum:kjFotoSeb});
+    const r=await sendQ('kerja',{jenis:$('#jn').value,blok:blok,ket:$('#kt').value,foto:kjFotoSes,foto_sebelum:kjFotoSeb});
     if(!r.ok)return P.fail('Gagal menyimpan');
     await P.ok('Laporan tersimpan',true);
     kjFotoSeb='';kjFotoSes='';kerja();
@@ -293,12 +291,12 @@ async function kirimKerjaKebersihan(b){
 }
 async function kirimKerja(b){const T=tm(),uu=isUU();
  if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');
- const P=btnProc(b,uu?'Menyimpan laporan…':'Mengambil lokasi…');
- try{let g=null,f='';
-  if(uu)f=usF||''; // Unit Usaha: tanpa lokasi (GPS), foto opsional
-  else{g=await gps();P.text('Menyiapkan kamera…');f=await shot(g);if(!f)return P.end()}
+ const P=btnProc(b,uu?'Menyimpan laporan…':'Menyiapkan kamera…');
+ try{let f='';
+  if(uu)f=usF||''; // Unit Usaha: foto opsional
+  else{f=await shot(null);if(!f)return P.end()} // tanpa menunggu GPS
   P.text('Menyimpan laporan…');await slp(300);
-  const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',...(g?{lat:g.lat,lng:g.lng}:{}),foto:f});
+  const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',foto:f});
   if(!r.ok)return P.fail('Gagal menyimpan');
   ['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''});if(uu){usF='';usFotoRender()}
   await P.ok('Laporan tersimpan')}
@@ -670,8 +668,8 @@ function tkDetail(id){const t=TK.find(x=>x.id===id);if(!t)return;const me=S.user
 function tkBack(){TIMS[S.user.tim]?tkList():home()}
 async function tkMulai(b,id){const c=($('#tkr')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi tanggapan awal terlebih dahulu');
  const t0=TK.find(x=>x.id===id);if(t0&&S.user.role==='user'){const hi=TK.find(x=>x.id!==id&&!x.pending&&x.tim===t0.tim&&['Baru','Ditugaskan'].includes(x.status)&&(!x.petugas||x.petugas===S.user.username)&&(PR_RANK[x.prioritas]||2)>(PR_RANK[t0.prioritas]||2));if(hi)return toast('⚠ Tanggapi dulu tiket prioritas lebih tinggi: '+hi.id+' ('+hi.prioritas+')')}
- const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketMulai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng});if(r.ok)tkList()}
-async function tkSelesai(b,id){const c=($('#tkc')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi catatan penyelesaian terlebih dahulu');const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketSelesai',{id,foto:p.f,sumber:'kamera',catatan:c,lat:p.g.lat,lng:p.g.lng});if(r.ok)tkList()}
+ const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketMulai',{id,foto:p.f,sumber:'kamera',catatan:c});if(r.ok)tkList()}
+async function tkSelesai(b,id){const c=($('#tkc')||{value:''}).value.trim();if(c.length<3)return toast('⚠ Isi catatan penyelesaian terlebih dahulu');const p=await getFoto('kamera');if(!p)return;const r=await sendQ('tiketSelesai',{id,foto:p.f,sumber:'kamera',catatan:c});if(r.ok)tkList()}
 function tkLocal(id,o){const t=TK.find(x=>x.id===id);if(t){Object.assign(t,o);localStorage.siagaTiket=JSON.stringify({tiket:TK,staff:STF})}}
 async function tkUbah(b,id,o){const r=await api('tiketUbah',{id,...o},b);if(r.ok)tkList()}
 function tkForm(){tkFoto='';tkG=null;tkSrc='';const def=TIMS[S.user.tim]?S.user.tim:'maintenance';
@@ -680,13 +678,13 @@ function tkTimPilih(){const tm=$('#tk0').value;$('#tk1').innerHTML=TJ[tm].map(k=
  $('#tk6w').style.display=(S.user.role!=='user'||S.user.tim===tm)?'flex':'none';if($('#tk6w').style.display==='none')$('#tk6').checked=false;tkItem()}
 function tkItem(){$('#tk2').innerHTML=MT[$('#tk1').value].map(x=>`<option>${x}</option>`).join('')}
 async function getFoto(src,fc){
- if(src==='galeri'){const c=await pickCanvas();if(!c)return null;const g=await gps();wmark(c,g,' [GALERI]');return{f:c.toDataURL('image/jpeg',camQ),g}}
- const g=await gps(),f=await shot(g,fc);return f?{f,g}:null}
+ if(src==='galeri'){const c=await pickCanvas();if(!c)return null;wmark(c,null,' [GALERI]');return{f:c.toDataURL('image/jpeg',camQ),g:null}}
+ const f=await shot(null,fc);return f?{f,g:null}:null} // foto tanpa menunggu GPS
 async function tkSnap(b,src){const p=await getFoto(src);if(p){tkFoto=p.f;tkG=p.g;tkSrc=src;$('#tkfs').textContent='✔ Foto terlampir ('+src+')'}}
 function ov(on,t){const e=$('#ov');if(!e)return;e.style.display=on?'flex':'none';if(on)e.innerHTML=`<div class="ring"></div><p class="dots" style="margin-top:18px;font-weight:700;color:var(--b);font-size:17px">${t}</p><small style="color:var(--g)">Jangan tutup aplikasi</small>`}
 function ovOk(t){const e=$('#ov');if(!e)return;e.style.display='flex';e.innerHTML=`<svg class="chk" width="84" height="84" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="#12805c" stroke-width="3"/><path d="M14 27l8 8 16-17" fill="none" stroke="#12805c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="margin-top:14px;font-weight:700;color:#12805c;font-size:17px">${t}</p>`;setTimeout(()=>ov(false),1300)}
 async function tkSubmit(b){const l=$('#tk3').value.trim(),d=$('#tk4').value.trim();if(!l||!d)return toast('⚠ Isi lokasi dan deskripsi');ov(true,'Membuat tiket');
- try{const g=tkG||await gps(),r=await sendQ('tiketBuat',{kategori:$('#tk1').value,item:$('#tk2').value,lokasi:l,deskripsi:d,prioritas:$('#tk5').value,self:$('#tk6w').style.display!=='none'&&$('#tk6').checked,foto:tkFoto,sumber:tkSrc,lat:g.lat,lng:g.lng});
+ try{const r=await sendQ('tiketBuat',{kategori:$('#tk1').value,item:$('#tk2').value,lokasi:l,deskripsi:d,prioritas:$('#tk5').value,self:$('#tk6w').style.display!=='none'&&$('#tk6').checked,foto:tkFoto,sumber:tkSrc});
   if(r.ok){ovOk('Tiket tersimpan. Terkirim ke Tim '+TIMS[$('#tk0').value].n+' otomatis ≤3 menit');await new Promise(z=>setTimeout(z,900));tkBack()}else ov(false)}catch(e){ov(false)}}
 async function lMt(){const r=await api('sumTiket',{tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,hr=lpm==='hari',H=hr?d.harian:d.bulanan,du=m=>m?(m>=60?Math.floor(m/60)+' j '+Math.round(m%60)+' m':Math.round(m)+' m'):'-';
@@ -703,7 +701,7 @@ async function loadIpls(){const r=await api('userList',{tim:'ipl'},null,1);if(r.
 let ipB=tdy().slice(0,7),ipD={targets:[],lunas:[],riwayat:[]},iplFoto='',iplSrc='';
 function pickCanvas(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return res(null);
  try{const bm=await createImageBitmap(f,{imageOrientation:'from-image'}),W=Math.min(camW,bm.width),H=Math.round(bm.height*W/bm.width),c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(bm,0,0,W,H);res(c)}catch(e){toast('⚠ Gagal membaca gambar');res(null)}};i.oncancel=()=>res(null);i.click()})}
-function wmark(c,g,tag){const x=c.getContext('2d'),t=new Date().toLocaleString('id-ID')+' | '+g.lat.toFixed(6)+','+g.lng.toFixed(6)+' | '+S.user.nama+tag;x.fillStyle='#000a';x.fillRect(0,c.height-30,c.width,30);x.fillStyle='#fff';x.font='14px sans-serif';x.fillText(t,8,c.height-10);
+function wmark(c,g,tag){const x=c.getContext('2d'),t=new Date().toLocaleString('id-ID')+' | '+(g&&typeof g.lat==='number'?g.lat.toFixed(6)+','+g.lng.toFixed(6)+' | ':'')+S.user.nama+tag;x.fillStyle='#000a';x.fillRect(0,c.height-30,c.width,30);x.fillStyle='#fff';x.font='14px sans-serif';x.fillText(t,8,c.height-10);
  x.beginPath();x.arc(36,36,26,0,7);x.fill();if(logoImg)x.drawImage(logoImg,12,12,48,48);else{x.fillStyle='#1558d6';x.font='bold 28px sans-serif';x.fillText('S',27,46)}}
 async function iplUI(){$('#m').innerHTML='<div class="card">Memuat…</div>';const r=await api('iplSaya',{bulan:ipB},null,1);let c='';
  if(r.ok){ipD=r.data;localStorage.siagaIpl=JSON.stringify({b:ipB,d:r.data})}else if(r.net){const s=JSON.parse(localStorage.siagaIpl||'null');ipD=s&&s.b===ipB?s.d:{targets:[],lunas:[],riwayat:[]};c='📴 Offline: target dan progres dari data terakhir tersimpan.'}else return;
@@ -721,13 +719,13 @@ function iplRender(c){const T=ipD.targets,bar=p=>`<div style="background:#e8f0ff
  <div class="card"><b>Riwayat terakhir</b>${ipD.riwayat.map(x=>`<div class="news" style="font-size:13px">${esc(x.blok)}-${esc(x.rumah)} · ${x.bulan} · <b>${x.status}</b>${x.nominal?' · '+rp(x.nominal):''}<br><small>${fmt(x.ts)}${x.sumber?' · '+x.sumber:''}</small></div>`).join('')||'<small>Belum ada data</small>'}</div>`;iplTarif()}
 function iplTarif(){const i=$('#in');if(!i||i.dataset.e)return;const b=$('#ib').value.trim().toLowerCase(),t=ipD.targets.find(x=>String(x.blok).toLowerCase()===b);i.value=t?t.tarif:''}
 function iplSt(){$('#ibay').style.display=$('#is').value==='Bayar'?'block':'none'}
-async function iplCam(b){b.classList.add('busy');try{const g=await gps(),f=await shot(g);if(f){iplFoto=f;iplSrc='kamera';$('#ifs').textContent='✔ Bukti terlampir (kamera)'}}finally{b.classList.remove('busy')}}
-async function iplGal(b){const c=await pickCanvas();if(!c)return;b.classList.add('busy');try{const g=await gps();wmark(c,g,' [GALERI]');iplFoto=c.toDataURL('image/jpeg',camQ);iplSrc='galeri';$('#ifs').textContent='✔ Bukti terlampir (galeri)'}finally{b.classList.remove('busy')}}
+async function iplCam(b){b.classList.add('busy');try{const f=await shot(null);if(f){iplFoto=f;iplSrc='kamera';$('#ifs').textContent='✔ Bukti terlampir (kamera)'}}finally{b.classList.remove('busy')}}
+async function iplGal(b){const c=await pickCanvas();if(!c)return;b.classList.add('busy');try{wmark(c,null,' [GALERI]');iplFoto=c.toDataURL('image/jpeg',camQ);iplSrc='galeri';$('#ifs').textContent='✔ Bukti terlampir (galeri)'}finally{b.classList.remove('busy')}}
 async function iplSubmit(b){const blok=$('#ib').value.trim(),rumah=$('#ir').value.trim(),bulan=$('#im').value,st=$('#is').value,nom=+$('#in').value;
  if(!blok||!rumah||!bulan)return toast('⚠ Isi blok, no. rumah, dan bulan IPL');
  if(st==='Bayar'){if(!(nom>0))return toast('⚠ Isi nominal pembayaran');if(!iplFoto)return toast('⚠ Lampirkan bukti pembayaran (kamera atau galeri)');
   if(bulan===ipB&&ipD.lunas.includes(blok.toLowerCase()+'|'+rumah.toLowerCase()))return toast('⚠ Rumah ini sudah tercatat lunas untuk bulan tersebut')}
- const g=await gps(),r=await send('ipl',{blok,rumah,bulan,status:st,nominal:st==='Bayar'?nom:0,metode:$('#imt').value,foto:st==='Bayar'?iplFoto:'',sumber:iplSrc,ket:$('#ik').value,lat:g.lat,lng:g.lng},b);
+ const r=await send('ipl',{blok,rumah,bulan,status:st,nominal:st==='Bayar'?nom:0,metode:$('#imt').value,foto:st==='Bayar'?iplFoto:'',sumber:iplSrc,ket:$('#ik').value},b);
  if(r.ok){if(r.queued&&st==='Bayar'&&bulan===ipB){ipD.lunas.push(blok.toLowerCase()+'|'+rumah.toLowerCase());const t=ipD.targets.find(x=>String(x.blok).toLowerCase()===blok.toLowerCase());if(t){t.realisasi+=nom;t.lunas++;t.pct=Math.round(t.realisasi/t.target*1000)/10}localStorage.siagaIpl=JSON.stringify({b:ipB,d:ipD})}iplFoto='';iplSrc='';r.queued?iplRender(''):iplUI()}}
 async function lIpl(){const yr=lipm==='tahun',r=await api('sumIPL',{bulan:lbln,tahun:lth},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,R=yr?d.tahunRows:d.bulanRows,tg=R.reduce((a,x)=>a+x.target,0),rl=R.reduce((a,x)=>a+x.realisasi,0),pc=tg?Math.round(rl/tg*1000)/10:0;
@@ -811,9 +809,9 @@ function tamuForm(){tmF={tamu:'',id:''};tmG=null;
  <select id="t5"><option>Bertamu</option><option>Kurir / Paket</option><option>Servis / Teknisi</option><option>Pengiriman Barang</option><option>Vendor / Proyek</option><option>Lainnya</option></select><input id="t6" placeholder="Plat kendaraan (opsional)">
  <div class="row" style="grid-template-columns:1fr 2fr"><select id="t7"><option>KTP</option><option>SIM</option><option>Paspor</option><option>Lainnya</option></select><input id="t8" placeholder="No. identitas (opsional)"></div><textarea id="t9" placeholder="Catatan"></textarea>
  <label style="font-size:12px;color:var(--g)">Foto wajib dari kamera</label><div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="tmSnap(this,'tamu')">📷 Foto Tamu</button><button class="o" onclick="tmSnap(this,'id')">🪪 Foto Identitas</button></div><div id="tmfs" style="font-size:12px;color:var(--g)">Foto tamu: - · Foto identitas: -</div>${B('💾 Simpan Tamu','tamuSubmit')}${B('Batal','secUI','o')}</div>`}
-async function tmSnap(b,w){camW=w==='id'?1000:720;camQ=w==='id'?.75:.6;let g,f;try{g=await gps();f=await shot(g)}finally{camW=720;camQ=.6}if(f){tmF[w]=f;tmG=g;$('#tmfs').textContent='Foto tamu: '+(tmF.tamu?'✔':'-')+' · Foto identitas: '+(tmF.id?'✔':'-')}}
-async function tamuSubmit(b){const kartu=$('#t0').value,nama=$('#t1').value.trim(),tujuan=$('#t3').value.trim();if(!kartu)return toast('⚠ Pilih Kartu TAMU yang diberikan ke tamu');if(!nama||!tujuan)return toast('⚠ Isi nama tamu dan tujuan');if(!tmF.tamu||!tmF.id)return toast('⚠ Foto tamu dan foto identitas wajib');const g=tmG||await gps();
- const r=await sendQ('tamuCatat',{kartu,nama,asal:$('#t2').value,tujuan,penghuni:$('#t4').value,keperluan:$('#t5').value,plat:$('#t6').value,jenis_id:$('#t7').value,no_id:$('#t8').value,catatan:$('#t9').value,fotoTamu:tmF.tamu,fotoId:tmF.id,lat:g.lat,lng:g.lng});if(r.ok)secUI()}
+async function tmSnap(b,w){camW=w==='id'?1000:720;camQ=w==='id'?.75:.6;let f;try{f=await shot(null)}finally{camW=720;camQ=.6}if(f){tmF[w]=f;$('#tmfs').textContent='Foto tamu: '+(tmF.tamu?'✔':'-')+' · Foto identitas: '+(tmF.id?'✔':'-')}}
+async function tamuSubmit(b){const kartu=$('#t0').value,nama=$('#t1').value.trim(),tujuan=$('#t3').value.trim();if(!kartu)return toast('⚠ Pilih Kartu TAMU yang diberikan ke tamu');if(!nama||!tujuan)return toast('⚠ Isi nama tamu dan tujuan');if(!tmF.tamu||!tmF.id)return toast('⚠ Foto tamu dan foto identitas wajib');
+ const r=await sendQ('tamuCatat',{kartu,nama,asal:$('#t2').value,tujuan,penghuni:$('#t4').value,keperluan:$('#t5').value,plat:$('#t6').value,jenis_id:$('#t7').value,no_id:$('#t8').value,catatan:$('#t9').value,fotoTamu:tmF.tamu,fotoId:tmF.id});if(r.ok)secUI()}
 async function lTam(){const r=await api('sumTamu',{tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,hr=lpm==='hari',H=hr?d.harian:d.bulanan;let h=`<b>Buku Tamu ${hr?d.tanggal:d.bulan}</b>`+stat(hr?[['Total tamu',H.total],['Masih di dalam',H.dalam],['Kartu belum kembali',d.kartuDipakai]]:[['Total tamu',H.total],['Hari ada tamu',H.perHari.length]]);
  h+='<b>Per keperluan</b>'+tbl(H.perKeperluan.map(x=>({Keperluan:x.k,Jumlah:x.n})));if(!hr)h+='<hr class="np"><b>Per hari</b>'+tbl(H.perHari.map(x=>({Tanggal:x.tanggal,Tamu:x.n})));
@@ -855,7 +853,7 @@ function kgForm(){kgF={foto:'',src:'',g:null};const d=new Date(),p=n=>String(n).
 async function kgSnap(b,src){const p=await getFoto(src);if(p){kgF={foto:p.f,src,g:p.g};$('#kgfs').textContent='✔ Foto bukti izin terlampir ('+src+')'}}
 async function kgSubmit(b){const nama=$('#g1').value.trim(),pj=$('#g3').value.trim(),lok=$('#g5').value.trim(),m=$('#g6').value,s=$('#g7').value;
  if(!nama||!pj||!lok)return toast('⚠ Isi nama kegiatan, penyelenggara, dan lokasi');if(!m||!s||s<=m)return toast('⚠ Jadwal selesai harus setelah jadwal mulai');if(!kgF.foto)return toast('⚠ Foto bukti izin wajib');
- const g=kgF.g||await gps(),r=await sendQ('kgCatat',{nama,jenis:$('#g2').value,penyelenggara:pj,kontak:$('#g4').value,lokasi:lok,mulai:m,selesai:s,peserta:$('#g8').value,no_izin:$('#g9').value,penerbit:$('#g10').value,catatan:$('#g11').value,foto:kgF.foto,sumber:kgF.src,lat:g.lat,lng:g.lng});if(r.ok)kgUI()}
+ const r=await sendQ('kgCatat',{nama,jenis:$('#g2').value,penyelenggara:pj,kontak:$('#g4').value,lokasi:lok,mulai:m,selesai:s,peserta:$('#g8').value,no_izin:$('#g9').value,penerbit:$('#g10').value,catatan:$('#g11').value,foto:kgF.foto,sumber:kgF.src});if(r.ok)kgUI()}
 async function lKg(){const r=await api('sumKegiatan',{tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,hr=lpm==='hari',H=hr?d.harian:d.bulanan;let h=`<b>Izin Kegiatan ${hr?d.tanggal:d.bulan}</b>`+stat([['Kegiatan',H.total],['Peserta/pekerja',H.peserta],['Selesai',H.selesai],['Dibatalkan',H.dibatal]]);
  h+='<b>Per jenis kegiatan</b>'+tbl(H.perJenis.map(x=>({Jenis:x.k,Jumlah:x.n})));if(!hr)h+='<hr class="np"><b>Per hari (kegiatan berlangsung)</b>'+tbl(H.perHari.map(x=>({Tanggal:x.tanggal,Kegiatan:x.n})));
