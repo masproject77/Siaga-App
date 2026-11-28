@@ -47,6 +47,57 @@ table.rp-t td{border:1px solid #c5ccd6;padding:4px 8px;white-space:nowrap}
 table.rp-t tbody tr:nth-child(even) td{background:#f5f8fd}table.rp-t tr.rp-foot td{background:#dde6f5;font-weight:700}table.rp-t .rp-r{text-align:right}
 #lb .stat{text-align:left;background:#eef4ff;border:1px solid #d2e0f8;border-left:4px solid #1558d6;border-radius:8px}
 
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#e8f0ff;border-radius:12px;padding:3px;gap:3px;margin:8px 0 10px}
+.seg button{background:transparent;color:#1558d6;border:0;border-radius:10px;padding:10px 6px;font-weight:700;margin:0;box-shadow:none}
+.seg button.on{background:#1558d6;color:#fff;box-shadow:0 2px 8px #1558d655}
+.qv{position:relative;width:100%;aspect-ratio:1/1;max-height:62vh;background:#0b1220;border-radius:16px;overflow:hidden;margin:4px 0 10px}
+.qv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}.qv.on video{display:block}
+.qph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7f93b5;font-size:14px;gap:6px}.qph span{font-size:44px}
+.qf{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1/1;transform:translate(-50%,-50%);box-shadow:0 0 0 999px rgba(5,12,28,.48);border-radius:10px;display:none}.qv.on .qf{display:block}
+.qf i{position:absolute;width:28px;height:28px;border:4px solid #fff;transition:border-color .2s}
+.qf i:nth-child(1){left:-3px;top:-3px;border-right:0;border-bottom:0;border-top-left-radius:12px}.qf i:nth-child(2){right:-3px;top:-3px;border-left:0;border-bottom:0;border-top-right-radius:12px}
+.qf i:nth-child(3){left:-3px;bottom:-3px;border-right:0;border-top:0;border-bottom-left-radius:12px}.qf i:nth-child(4){right:-3px;bottom:-3px;border-left:0;border-top:0;border-bottom-right-radius:12px}
+.qln{position:absolute;left:5%;right:5%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#3dd68c,transparent);box-shadow:0 0 12px #3dd68c;animation:qs 1.7s ease-in-out infinite alternate}
+@keyframes qs{from{top:5%}to{top:94%}}
+.qv.hit .qf i{border-color:#3dd68c}.qv.hit .qf{animation:qp .45s}.qv.hit .qln{display:none}@keyframes qp{50%{transform:translate(-50%,-50%) scale(1.06)}}
+.qst{position:absolute;left:10px;right:10px;bottom:10px;background:#000b;color:#fff;border-radius:10px;padding:7px 10px;font-size:13px;text-align:center}.qst.err{background:#d92d20e6}
+.pkm{font-size:13px;color:var(--g);margin:4px 0 10px;min-height:18px}.pkm.ok{color:#12805c;font-weight:700}.pkm.bad{color:#d92d20;font-weight:700}
+.pvo{position:fixed;inset:0;z-index:9999;background:rgba(8,16,36,.62);display:flex;align-items:center;justify-content:center;padding:16px;animation:pvf .2s}
+@keyframes pvf{from{opacity:0}}
+.pvc{width:100%;max-width:380px;background:#fff;border-radius:18px;padding:18px 18px 16px;box-shadow:0 20px 60px #0007;animation:pvu .25s}@keyframes pvu{from{transform:translateY(14px);opacity:.4}}
+.pvh{text-align:center;margin-bottom:12px}.pvh b{display:block;font-size:17px}.pvh small{color:#6b7a90}
+.pvb{height:10px;background:#e6edf8;border-radius:99px;overflow:hidden}
+.pvbar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#1558d6,#4f9dff,#1558d6);background-size:200% 100%;animation:pvs 1.1s linear infinite;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.pvbar.ok{background:#12805c;animation:none}.pvbar.warn{background:#d97706;animation:none}.pvbar.err{background:#d92d20;animation:none}
+@keyframes pvs{to{background-position:-200% 0}}
+.pvp{text-align:right;font-size:12px;color:#6b7a90;margin:3px 0 8px}
+.pvl{list-style:none;margin:0;padding:0}.pvl li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;opacity:.42;transition:opacity .3s}
+.pvl li.r,.pvl li.o,.pvl li.t,.pvl li.x{opacity:1}
+.pvl .ic{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c5ccd6;position:relative;margin-top:1px;box-sizing:border-box}
+.pvl li.r .ic{border-color:#c9d8f5;border-top-color:#1558d6;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.pvl li.o .ic{background:#12805c;border-color:#12805c}.pvl li.o .ic::after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);animation:pop .3s}
+@keyframes pop{from{transform:rotate(45deg) scale(.2);opacity:0}}
+.pvl li.x .ic{background:#d92d20;border-color:#d92d20}.pvl li.x .ic::after{content:'✕';color:#fff;position:absolute;inset:0;font-size:12px;line-height:18px;text-align:center}
+.pvl li.t .ic{background:#d97706;border-color:#d97706}.pvl li.t .ic::after{content:'!';color:#fff;position:absolute;inset:0;font-size:13px;font-weight:700;line-height:18px;text-align:center}
+.pvl b{font-size:14px}.pvl small{display:block;color:#6b7a90;font-size:12px}
+.pvc.end .pvl,.pvo.end .pvl{display:none}.pvo.end .pvp{display:none}
+.pvr{display:none;text-align:center;margin-top:8px;animation:pvf .3s}.pvr p{margin:6px 0 12px;font-size:14px}
+.ckc{stroke-dasharray:158;stroke-dashoffset:158;animation:ckd .6s .05s forwards}.ckm{stroke-dasharray:50;stroke-dashoffset:50;animation:ckd .35s .5s forwards}@keyframes ckd{to{stroke-dashoffset:0}}
+
+button{position:relative;overflow:hidden}
+.bbar{position:absolute;left:0;bottom:0;height:4px;width:38%;background:rgba(255,255,255,.8);border-radius:4px;animation:bbar 1.05s ease-in-out infinite}
+button.o .bbar{background:#1558d6}@keyframes bbar{0%{left:-38%}100%{left:100%}}
+button.proc,button.big.proc{pointer-events:none;background:linear-gradient(90deg,#1558d6,#3b82f6,#1558d6);background-size:200% 100%;animation:bshim 1.3s linear infinite;box-shadow:0 4px 14px rgba(21,88,214,.35)}
+button.o.proc{background:#e8f0ff;animation:none;color:#1558d6}
+.bsp{width:18px;height:18px;flex:none;border:2.5px solid #fff6;border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite}button.o .bsp{border-color:#1558d655;border-top-color:#1558d6}
+.btx{animation:btx .22s}@keyframes btx{from{transform:translateY(5px)}}
+button.okk,button.big.okk{pointer-events:none;background:#12805c!important;color:#fff!important;animation:bpop .35s;box-shadow:0 4px 14px rgba(18,128,92,.4)}
+button.errb,button.big.errb{pointer-events:none;background:#d92d20!important;color:#fff!important;animation:bshake .4s}
+.bck{display:inline-block;font-size:18px;font-weight:700;animation:bpop .4s}
+@keyframes bshim{to{background-position:-200% 0}}@keyframes bpop{from{transform:scale(.7);opacity:.5}}@keyframes bshake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.ufpv{display:flex;gap:10px;align-items:center;margin:4px 0 6px}.ufpv img{width:74px;height:74px;object-fit:cover;border-radius:10px;border:1px solid var(--bd)}.ufpv small{display:block;color:#12805c;font-weight:700;margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){.bbar,.bsp,button.proc{animation-duration:2.4s}}
+
 @media print{header,nav,.np{display:none}}
 </style></head><body>
 <header><div class="logo" id="lg">S</div><div><b>SIAGA</b><small>Respect, Respon, Report, Reaction</small></div>
@@ -76,7 +127,7 @@ let camR,camW=720,camQ=.6;async function foto(fc){const st=await navigator.media
  return new Promise(r=>camR=a=>{st.getTracks().forEach(t=>t.stop());$('#cam').style.display='none';r(a)})}
 function camX(ok){if(!ok)return camR(null);const v=$('#v'),W=camW,H=Math.round(W*v.videoHeight/v.videoWidth),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
  x.drawImage(v,0,0,W,H);camR(c)}
-async function shot(g,fc){const c=await foto(fc);if(!c)return null;const x=c.getContext('2d'),t=new Date().toLocaleString('id-ID')+' | '+g.lat.toFixed(6)+','+g.lng.toFixed(6)+' | '+S.user.nama;
+async function shot(g,fc){const c=await foto(fc);if(!c)return null;const x=c.getContext('2d'),t=new Date().toLocaleString('id-ID')+' | '+(g&&typeof g.lat==='number'?g.lat.toFixed(6)+','+g.lng.toFixed(6)+' | ':'')+S.user.nama;
  x.fillStyle='#000a';x.fillRect(0,c.height-30,c.width,30);x.fillStyle='#fff';x.font='14px sans-serif';x.fillText(t,8,c.height-10);
  x.fillStyle='#fff';x.beginPath();x.arc(36,36,26,0,7);x.fill();if(logoImg)x.drawImage(logoImg,12,12,48,48);else{x.fillStyle='#1558d6';x.font='bold 28px sans-serif';x.fillText('S',27,46)}
  return c.toDataURL('image/jpeg',camQ)}
@@ -110,19 +161,20 @@ function dashHtml(d,u,T){const gb=(t,l)=>`<button onclick="go('${t}')">${l}</but
  if(u.tim==='ipl'){const p=d.ipl||{target:0,pct:0,realisasi:0,lunas:0,rumah:0,kunjungan:0,bulan:''};h+=`<div class="card"><b>💳 Target IPL ${p.bulan}</b>${p.target?`<div style="background:#e8f0ff;border-radius:6px;height:10px;margin:8px 0"><div style="width:${Math.min(100,p.pct)}%;background:${p.pct>=100?'#12805c':'var(--b)'};height:10px;border-radius:6px"></div></div>${stat([['Capaian',p.pct+'%'],['Terkumpul',rp(p.realisasi)],['Rumah lunas',p.lunas+'/'+p.rumah]])}<small>Kunjungan hari ini: ${p.kunjungan}</small>`:'<p style="font-size:13px;color:var(--g)">Belum ada target bulan ini. Hubungi SPV/Admin.</p>'}${gb('kerja','💳 Catat Penagihan')}</div>`}
  if(u.role!=='user'&&d.awas)h+=`<div class="card"><b>📋 Pengawasan</b>${stat([['Hadir (24 jam)',d.awas.hadir+'/'+d.awas.total],['Tiket aktif',d.awas.tiket],['Telat respon',d.awas.telat||0]])}<div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="go('lap')">📈 Laporan</button><button class="o" onclick="go('admin')">⚙ Admin</button></div></div>`;
  return h}
+const NEED_VER=3.0; // versi Code.gs minimum yang dibutuhkan aplikasi ini
 async function home(){let c=null;try{c=JSON.parse(localStorage.siagaHome||'null')}catch(e){}
  const empty={ok:true,berita:[],summary:{},dash:{},cached:1};
  if(c){c.cached=!navigator.onLine;await homeDraw(c)}else $('#m').innerHTML='<div class="card" id="vw-home">Memuat…</div>';
  if(!navigator.onLine){if(!c)await homeDraw(empty);return}
  const r=await api('home',{},null,2); // di latar belakang; tampilan lokal sudah muncul
- if(r.ok){const old=localStorage.siagaHome;localStorage.siagaHome=JSON.stringify(r);if($('#vw-home')&&(!c||old!==localStorage.siagaHome||c.cached))await homeDraw(r)}
+ if(r.ok){const old=localStorage.siagaHome;localStorage.siagaHome=JSON.stringify(r);if($('#vw-home')&&(!c||old!==localStorage.siagaHome||c.cached))await homeDraw({...r,live:1})}
  else if(r.net&&!c&&$('#vw-home'))await homeDraw(empty)}
 async function homeDraw(r){
  const u=S.user,T=tm(),d=JSON.parse(JSON.stringify(r.dash||{})),Q=(await qAll()).filter(x=>x.user===u.username),hr=new Date().getHours(),sal=hr<11?'Selamat pagi':hr<15?'Selamat siang':hr<19?'Selamat sore':'Selamat malam',a=d.absen,qa=Q.filter(x=>x.a==='absen').pop();
  let st=a&&a.sedang?'🟢 Bertugas sejak '+fmt(a.ts):a&&String(a.ts).slice(0,10)===tdy()?'⚪ Terakhir '+a.tipe+' '+fmt(a.ts).slice(11):'🔴 Belum absen hari ini';if(qa)st='📴 Absen '+qa.d.tipe+' tersimpan, menunggu sinkron';
  {const ld=s=>{const x=new Date(s),p=v=>String(v).padStart(2,'0');return x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate())},pd=a=>Q.filter(x=>x.a===a&&x.st!=='rej'&&ld(x.d.ts)===tdy()).length;
   if(u.tim==='security')d.patroli=(d.patroli||0)+pd('patroli');if(d.kerja)d.kerja.total=(d.kerja.total||0)+pd('kerja')}
- $('#m').innerHTML=`<span id="vw-home" hidden></span>${r.cached?'<div class="card" style="background:#fff6e0">📴 Mode offline: menampilkan data terakhir tersimpan.</div>':''}${(parseFloat(r.versi)||0)<2.5?'<div class="card" style="background:#fde8e6;font-size:13px">⚠ <b>Server (Code.gs) belum versi terbaru (v2.5).</b> Admin: tempel Code.gs terbaru, jalankan setup(), lalu Deploy → Manage deployments → New version.</div>':''}<div class="card" style="background:linear-gradient(135deg,#1558d6,#3b82f6);color:#fff;border:0"><div style="font-size:13px;opacity:.9">${sal},</div><b style="font-size:20px">${esc(u.nama)}</b><div style="font-size:13px;margin:2px 0 8px">${T.ic} ${T.n}${d.shift?' · Shift '+d.shift:''} · ${u.role}</div><div style="font-size:14px;margin-bottom:6px">${st}</div><button style="background:#fff;color:var(--b)" onclick="go('absen')">🕘 Absen IN / OUT / Permit</button></div>
+ $('#m').innerHTML=`<span id="vw-home" hidden></span>${r.cached?'<div class="card" style="background:#fff6e0">📴 Mode offline: menampilkan data terakhir tersimpan.</div>':''}${(()=>{const sv=parseFloat(r.versi)||0,lama=r.live?sv<NEED_VER:(!!r.versi&&sv<NEED_VER);return lama?`<div class="card" style="background:#fde8e6;font-size:13px">⚠ <b>Server (Code.gs) masih versi ${r.versi?esc(r.versi):'lama'}</b>, aplikasi ini membutuhkan <b>v${NEED_VER.toFixed(1)}</b>. Sebagian fitur (sinkron tamu/kegiatan, rekap) belum berfungsi benar. Admin: tempel Code.gs terbaru ke Apps Script, lalu <b>Deploy → Manage deployments → ✏ Edit → Version: New version → Deploy</b> (jangan pilih "New deployment" agar alamat tidak berubah).</div>`:''})()}<div class="card" style="background:linear-gradient(135deg,#1558d6,#3b82f6);color:#fff;border:0"><div style="font-size:13px;opacity:.9">${sal},</div><b style="font-size:20px">${esc(u.nama)}</b><div style="font-size:13px;margin:2px 0 8px">${T.ic} ${T.n}${d.shift?' · Shift '+d.shift:''} · ${u.role}</div><div style="font-size:14px;margin-bottom:6px">${st}</div><button style="background:#fff;color:var(--b)" onclick="go('absen')">🕘 Absen IN / OUT / Permit</button></div>
  ${dashHtml(d,u,T)}
  <div class="card"><b>📰 Info & Berita</b>${(r.berita||[]).map(n=>{
    const lnk = n.link ? (String(n.link).startsWith('http') ? n.link : 'https://'+n.link) : '';
@@ -211,7 +263,7 @@ function genHtml(T){
       ${B('📨 Kirim Laporan Pekerjaan','kirimKerjaKebersihan','big')}
     </div>`;
   }
-  return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${B('📷 Foto & Kirim','kirimKerja')}</div>`;
+  return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${S.user.tim==='unitusaha'?usFotoBox():''}${B(S.user.tim==='unitusaha'?'💾 Simpan Laporan':'📷 Foto & Kirim','kirimKerja')}</div>`;
 }
 async function kjSnap(b,w){
   b.classList.add('busy');
@@ -229,28 +281,121 @@ async function kirimKerjaKebersihan(b){
   if(!blok)return toast('⚠ Isi lokasi pekerjaan (Blok / area)');
   if(!kjFotoSeb)return toast('⚠ Foto SEBELUM pekerjaan wajib diambil');
   if(!kjFotoSes)return toast('⚠ Foto SESUDAH pekerjaan wajib diambil');
-  const g=kjG||await gps();
-  const r=await sendQ('kerja',{
-    jenis:$('#jn').value,
-    blok:blok,
-    ket:$('#kt').value,
-    lat:g.lat,
-    lng:g.lng,
-    foto:kjFotoSes,
-    foto_sebelum:kjFotoSeb
-  },b);
-  if(r.ok){
-    kjFotoSeb=''; kjFotoSes='';
-    kerja();
-  }
+  const P=btnProc(b,'Mengambil lokasi…');
+  try{
+    const g=kjG||await gps();
+    P.text('Menyimpan laporan…');await slp(350);
+    const r=await sendQ('kerja',{jenis:$('#jn').value,blok:blok,ket:$('#kt').value,lat:g.lat,lng:g.lng,foto:kjFotoSes,foto_sebelum:kjFotoSeb});
+    if(!r.ok)return P.fail('Gagal menyimpan');
+    await P.ok('Laporan tersimpan',true);
+    kjFotoSeb='';kjFotoSes='';kerja();
+  }catch(e){P.fail('Gagal, coba lagi')}
 }
-async function kirimKerja(b){const T=tm();if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');const g=await gps();const f=await shot(g);if(f){const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',lat:g.lat,lng:g.lng,foto:f},b);if(r.ok){['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''})}}}
-async function patrol(b){const g=await gps();let kode;
- if('BarcodeDetector'in window){const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}),v=document.createElement('video');v.srcObject=st;v.setAttribute('playsinline','');await v.play();const d=new BarcodeDetector({formats:['qr_code','code_128']});toast('Arahkan ke barcode…');
-  for(let i=0;i<60&&!kode;i++){const r=await d.detect(v).catch(()=>[]);if(r[0])kode=r[0].rawValue;await new Promise(r=>setTimeout(r,300))}st.getTracks().forEach(t=>t.stop())}
- kode=kode||prompt('Masukkan kode titik:');if(!kode)return;const TL=JSON.parse(localStorage.siagaTitik||'[]');
- if(TL.length){const T=TL.find(t=>String(t.kode)===String(kode));if(!T)return toast('⚠ Barcode tidak dikenal');const d=hav(g.lat,g.lng,+T.lat,+T.lng);if(d>cfg.radius)return toast('⚠ Di luar radius titik ('+Math.round(d)+' m)')}
- const f=await shot(g);if(f){await sendQ('patroli',{kode,lat:g.lat,lng:g.lng,foto:f},b);if(typeof patStat==='function'&&$('#hps'))patStat().then(x=>{const e=$('#hps');if(e)e.innerHTML=x.map(chip).join('')||'Belum ada titik'})}}
+async function kirimKerja(b){const T=tm(),uu=isUU();
+ if(T.rumah&&!$('#rm').value.trim())return toast('⚠ Isi blok / no. rumah');if(T.nilai&&$('#nl').value==='')return toast('⚠ Isi nominal (isi 0 bila tidak ada)');
+ const P=btnProc(b,uu?'Menyimpan laporan…':'Mengambil lokasi…');
+ try{let g=null,f='';
+  if(uu)f=usF||''; // Unit Usaha: tanpa lokasi (GPS), foto opsional
+  else{g=await gps();P.text('Menyiapkan kamera…');f=await shot(g);if(!f)return P.end()}
+  P.text('Menyimpan laporan…');await slp(300);
+  const r=await sendQ('kerja',{jenis:$('#jn').value,ket:$('#kt').value,rumah:$('#rm')?$('#rm').value.trim():'',nilai:$('#nl')?$('#nl').value:'',...(g?{lat:g.lat,lng:g.lng}:{}),foto:f});
+  if(!r.ok)return P.fail('Gagal menyimpan');
+  ['#rm','#nl','#kt'].forEach(s=>{const e=$(s);if(e)e.value=''});if(uu){usF='';usFotoRender()}
+  await P.ok('Laporan tersimpan')}
+ catch(e){P.fail('Gagal, coba lagi')}}
+// ===== Patroli: pilih Scan QR (preview kamera) atau Input Kode Titik + progres submit beranimasi =====
+let pm=localStorage.siagaPatMode||'scan',PSC=null,pgp=null,pgt=0;
+const slp=ms=>new Promise(r=>setTimeout(r,ms));
+const titikList=()=>{try{return JSON.parse(localStorage.siagaTitik||'[]')}catch(e){return[]}};
+const patGps=()=>{if(pgp&&Date.now()-pgt<15000)return pgp;pgt=Date.now();return pgp=gps().catch(e=>{pgp=null;throw e})}; // GPS dipanaskan saat scan dimulai
+function patResolve(txt){const L=titikList(),s=String(txt||'').trim(),lc=x=>String(x==null?'':x).trim().toLowerCase();
+ if(!s)return{raw:'',T:null,kode:'',known:L.length>0};
+ let T=L.find(t=>lc(t.kode)===lc(s))||L.find(t=>t.nama&&lc(t.nama)===lc(s));
+ if(!T){const tk=s.split(/[^A-Za-z0-9_-]+/).filter(Boolean);T=L.find(t=>tk.some(k=>lc(k)===lc(t.kode)))}
+ return{raw:s,T:T||null,kode:T?String(T.kode):s,known:L.length>0}}
+function patrol(){pm='scan';sm='pat';secUI()}
+function patrolUI(){patStop();if(S.user.patroli==='tidak')return $('#sc').innerHTML='<div class="card">Anda tidak terdaftar sebagai petugas patroli. Hubungi SPV/Admin.</div>';
+ patStat().then(d=>{const e=$('#ps');if(e)e.innerHTML=d.map(chip).join('')||'Belum ada titik'});
+ $('#sc').innerHTML=`<div id="vw-pat"><div class="card"><b>Status Patroli per Blok</b><div id="ps">Memuat…</div></div><div class="card"><b>Patroli Rutin</b><p style="color:var(--g);font-size:13px;margin:4px 0">Setiap ${cfg.interval_patroli_jam} jam, wajib tiap blok. Pilih cara mencatat titik patroli. GPS dan foto bukti tetap wajib.</p>
+ <div class="seg"><button class="${pm==='scan'?'on':''}" onclick="patMode('scan')">📷 Scan QR Code</button><button class="${pm==='kode'?'on':''}" onclick="patMode('kode')">⌨ Input Kode Titik</button></div><div id="pat-body"></div></div></div>`;patBody()}
+function patMode(m){patStop();pm=m;localStorage.siagaPatMode=m;patBody(true)}
+function patBody(sync){const e=$('#pat-body');if(!e)return;if(sync)document.querySelectorAll('.seg button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(pm==='scan')));
+ if(pm==='scan')e.innerHTML=`<div class="qv" id="qv"><video id="qvid" playsinline muted></video><div class="qf"><i></i><i></i><i></i><i></i><span class="qln"></span></div><div class="qph" id="qph"><span>📷</span>Kamera belum aktif</div><div class="qst" id="qst">Tekan <b>Mulai Scan</b> untuk membuka kamera</div></div>
+  <div class="row" style="grid-template-columns:1fr auto auto"><button id="qgo" onclick="patStart()">▶ Mulai Scan</button><button class="o" id="qtc" style="display:none;width:auto" onclick="patTorch()">🔦</button><button class="o" id="qstop" style="display:none;width:auto" onclick="patStop(1)">■ Stop</button></div>
+  <small style="color:var(--g)">Arahkan kamera ke QR Code di titik patroli. Tidak terbaca? Pilih <b>Input Kode Titik</b>.</small>`;
+ else e.innerHTML=`<label style="font-size:12px;color:var(--g)">Kode titik patroli</label><input id="pk" list="pkl" placeholder="Contoh: PTR-001" autocomplete="off" autocapitalize="characters" oninput="patMatch()" onkeydown="if(event.key==='Enter')patKode()"><datalist id="pkl">${titikList().map(t=>`<option value="${esc(t.kode)}">${esc((t.nama||'')+(t.blok?' · Blok '+t.blok:''))}</option>`).join('')}</datalist>
+  <div id="pkm" class="pkm">Ketik atau pilih kode titik patroli.</div><button id="pkb" onclick="patKode()" disabled>Lanjut ➜ Foto &amp; Kirim</button>`}
+function patMatch(){const v=($('#pk')||{value:''}).value,R=patResolve(v),m=$('#pkm'),b=$('#pkb');if(!m)return;
+ if(!R.raw){m.className='pkm';m.textContent='Ketik atau pilih kode titik patroli.';b.disabled=true}
+ else if(R.T){m.className='pkm ok';m.textContent='✓ '+(R.T.nama||R.T.kode)+(R.T.blok?' · Blok '+R.T.blok:'');b.disabled=false}
+ else if(R.known){m.className='pkm bad';m.textContent='✕ Kode tidak dikenal';b.disabled=true}
+ else{m.className='pkm';m.textContent='Daftar titik belum tersimpan di HP; kode akan diperiksa server.';b.disabled=false}}
+function patKode(){const v=($('#pk')||{value:''}).value.trim();if(!v)return toast('⚠ Isi kode titik patroli');patProses(v,'kode')}
+// ---- scanner kamera ----
+function qSet(t,err){const e=$('#qst');if(e){e.innerHTML=t;e.className='qst'+(err?' err':'')}}
+async function patStart(){patStop();const v=$('#qvid');if(!v)return;qSet('Membuka kamera…');
+ let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})}
+ catch(e){return qSet('⚠ Kamera tidak bisa dibuka'+(e&&e.name==='NotAllowedError'?' (izin kamera ditolak)':'')+'. Gunakan <b>Input Kode Titik</b>.',1)}
+ v.srcObject=st;try{await v.play()}catch(e){}
+ const tr=st.getVideoTracks()[0],cap=tr&&tr.getCapabilities?tr.getCapabilities():{};PSC={st,v,on:1,tr,torch:false,t:0};
+ $('#qv').classList.add('on');$('#qph').style.display='none';$('#qgo').style.display='none';$('#qstop').style.display='';if(cap.torch)$('#qtc').style.display='';
+ patGps().catch(()=>{}); // panaskan GPS selagi scan
+ let det=null;if('BarcodeDetector'in window){try{det=new BarcodeDetector({formats:['qr_code','code_128']})}catch(e){try{det=new BarcodeDetector()}catch(e2){det=null}}}
+ const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});qSet('Arahkan kamera ke QR Code…');
+ const loop=async()=>{const P=PSC;if(!P||!P.on)return;if(!document.body.contains(v))return patStop();
+  try{if(v.readyState>=2&&v.videoWidth){let txt=null;
+    if(det){const r=await det.detect(v).catch(()=>[]);if(r&&r[0])txt=r[0].rawValue}
+    if(!txt&&window.QRDEC){const k=Math.min(1,720/Math.max(v.videoWidth,v.videoHeight));cv.width=Math.round(v.videoWidth*k);cv.height=Math.round(v.videoHeight*k);cx.drawImage(v,0,0,cv.width,cv.height);const d=cx.getImageData(0,0,cv.width,cv.height);txt=QRDEC.decode(d.data,cv.width,cv.height)}
+    if(txt)return patHit(txt)}}catch(e){}
+  if(PSC===P&&P.on)P.t=setTimeout(loop,det?120:200)};
+ loop()}
+function patHit(txt){const P=PSC;if(!P||!P.on)return;P.on=false;navigator.vibrate&&navigator.vibrate(80);const q=$('#qv');if(q)q.classList.add('hit');qSet('✓ QR terbaca');
+ setTimeout(()=>{patStop();patProses(txt,'scan')},260)}
+function patStop(manual){const P=PSC;PSC=null;if(P){P.on=false;clearTimeout(P.t);try{P.st.getTracks().forEach(t=>t.stop())}catch(e){}}if(manual&&$('#pat-body'))patBody()}
+async function patTorch(){const P=PSC;if(!P||!P.tr)return;try{P.torch=!P.torch;await P.tr.applyConstraints({advanced:[{torch:P.torch}]})}catch(e){toast('⚠ Lampu kilat tidak didukung')}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)patStop(1)});
+// ---- overlay progres submit ----
+function patOv(steps){const o=document.getElementById('pvo');if(o)o.remove();const d=document.createElement('div');d.id='pvo';d.className='pvo';
+ d.innerHTML=`<div class="pvc"><div class="pvh"><b id="pvt">Memproses Patroli</b><small id="pvs">Mohon tunggu, jangan tutup layar</small></div><div class="pvb"><div class="pvbar" id="pvbar"></div></div><div class="pvp" id="pvp">0%</div>
+ <ul class="pvl">${steps.map((s,i)=>`<li id="pvl${i}"><span class="ic"></span><div><b>${s}</b><small id="pvd${i}"></small></div></li>`).join('')}</ul><div class="pvr" id="pvr"></div></div>`;
+ document.body.appendChild(d);const g=id=>d.querySelector('#'+id);let tm=0;
+ const O={set(i,st,det){const li=g('pvl'+i);if(!li)return;li.className={run:'r',ok:'o',wait:'t',err:'x'}[st]||'';if(det!=null)g('pvd'+i).textContent=det},
+  pct(n){g('pvbar').style.width=n+'%';g('pvp').textContent=n+'%'},hide(){d.style.display='none'},show(){d.style.display=''},
+  close(){clearTimeout(tm);d.remove()},
+  end(kind,title,msg,btns,auto){g('pvbar').className='pvbar '+kind;d.classList.add('end');g('pvt').textContent=title;g('pvs').textContent='';
+   const ic=kind==='err'?'<circle class="ckc" cx="26" cy="26" r="25" fill="none" stroke="#d92d20" stroke-width="3"/><path class="ckm" d="M17 17l18 18M35 17L17 35" fill="none" stroke="#d92d20" stroke-width="3.5" stroke-linecap="round"/>':
+    `<circle class="ckc" cx="26" cy="26" r="25" fill="none" stroke="${kind==='warn'?'#d97706':'#12805c'}" stroke-width="3"/><path class="ckm" d="M14 27l8 8 16-17" fill="none" stroke="${kind==='warn'?'#d97706':'#12805c'}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+   g('pvr').innerHTML=`<svg width="64" height="64" viewBox="0 0 52 52">${ic}</svg><p>${msg}</p>`+(btns||'');g('pvr').style.display='block';if(auto)tm=setTimeout(()=>O.close(),auto)},
+  done(msg,warn){O.pct(100);O.end(warn?'warn':'ok',warn?'Tersimpan di HP':'Berhasil',msg,'<button class="o" onclick="patOvClose()">Selesai</button>',warn?4200:2600)},
+  fail(msg,retry){O.end('err','Tidak berhasil',msg,'<div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="patOvClose()">Tutup</button><button onclick="patOvClose();patRetry()">Coba lagi</button></div>')}};
+ O.pct(5);return O}
+const patOvClose=()=>{const o=document.getElementById('pvo');if(o)o.remove()};
+function patRetry(){if(pm==='scan')patStart();else{const e=$('#pk');if(e){e.focus();e.select()}}}
+// ---- alur utama: validasi -> GPS -> foto -> simpan -> kirim ----
+async function patProses(txt,via){
+ const O=patOv(['Kode titik diterima','Memeriksa lokasi (GPS)','Mengambil foto bukti','Menyimpan laporan','Mengirim ke server']);let nama='';
+ try{
+  O.set(0,'run');await slp(350);const R=patResolve(txt);
+  if(R.known&&!R.T)return O.set(0,'err','Kode tidak dikenal'),O.fail('Kode “'+esc(R.raw.slice(0,40))+'” tidak ada di daftar titik patroli. Periksa kode atau scan titik yang benar.');
+  nama=R.T?(R.T.nama||R.kode):R.kode;O.set(0,'ok',nama+(R.T&&R.T.blok?' · Blok '+R.T.blok:''));O.pct(15);
+  O.set(1,'run','Mencari sinyal GPS…');let g;try{g=await patGps()}catch(e){return O.set(1,'err','GPS tidak aktif'),O.fail('GPS tidak dapat dibaca. Aktifkan GPS dan izin lokasi lalu coba lagi.')}
+  if(g.fake)return O.set(1,'err','GPS palsu'),O.fail('Lokasi palsu (Fake GPS) terdeteksi. Matikan aplikasi lokasi palsu lalu coba lagi.');
+  let jarak=null;if(R.T&&R.T.lat!==''&&R.T.lat!=null&&!isNaN(+R.T.lat)){jarak=hav(g.lat,g.lng,+R.T.lat,+R.T.lng);
+   if(jarak>cfg.radius)return O.set(1,'err',Math.round(jarak)+' m dari titik'),O.fail('Di luar radius titik: '+Math.round(jarak)+' m (maksimal '+cfg.radius+' m). Dekati titik patroli lalu coba lagi.')}
+  O.set(1,'ok',jarak==null?'GPS terkunci':Math.round(jarak)+' m dari titik');O.pct(35);
+  O.set(2,'run','Menyiapkan kamera foto…');await slp(200);O.hide();const f=await shot(g);O.show();
+  if(!f)return O.set(2,'err','Dibatalkan'),O.fail('Foto bukti dibatalkan. Foto dari kamera wajib untuk patroli.');
+  O.set(2,'ok','Foto tersimpan');O.pct(60);
+  O.set(3,'run');const r=await sendQ('patroli',{kode:R.kode,lat:g.lat,lng:g.lng,foto:f},null,true);await slp(250);O.set(3,'ok','Tersimpan di HP');O.pct(75);
+  if(!navigator.onLine){O.set(4,'wait','Offline');pgp=null;return O.done('Patroli '+esc(nama)+' tersimpan. Terkirim otomatis saat online.',1)}
+  O.set(4,'run','Menghubungi server…');const t0=Date.now();let tries=0,it;
+  do{if(!syncing&&tries<3){tries++;sync(null,0,true)}await slp(400);it=(await qAll()).find(x=>x.uid===r.uid)}while(it&&it.st!=='rej'&&Date.now()-t0<10000);
+  if(!it){O.set(4,'ok','Diterima server');O.done('Patroli <b>'+esc(nama)+'</b> tercatat'+(jarak==null?'':' · '+Math.round(jarak)+' m dari titik'))}
+  else if(it.st==='rej'){await qDel(it.uid);badge();return O.set(4,'err','Ditolak'),O.fail('Server menolak: '+esc(it.err||'data tidak valid'))}
+  else{O.set(4,'wait','Menunggu koneksi');O.done('Patroli '+esc(nama)+' tersimpan. Terkirim otomatis ≤3 menit atau tekan ⟳ Sinkronkan.',1)}
+ }catch(e){O.fail('Terjadi kesalahan: '+esc((e&&e.message)||e))}
+ finally{pgp=null;if(pm==='scan'&&$('#pat-body'))patBody();try{patStat().then(d=>{const e=$('#ps');if(e)e.innerHTML=d.map(chip).join('')||'Belum ada titik';const h=$('#hps');if(h)h.innerHTML=d.map(chip).join('')||'Belum ada titik'})}catch(e){}}}
+
 let rt='Absen',rd=[],rtm='';
 // ===== Rekap: detail transaksi per user, preview + export PDF (A4 Landscape) & XLSX =====
 let rkd='',rks='',RKM=null; // diisi saat Rekap dibuka (tdy() baru tersedia setelah skrip utama dimuat)
@@ -436,7 +581,7 @@ async function lPat(){const r=await api('sumPatroli',{tanggal:ltg,bulan:lbln},nu
 let um='sampah';
 const katList=k=>JSON.parse(localStorage.siagaKat||'[]').filter(x=>x.kategori===k);
 const rp=n=>'Rp '+Math.round(+n||0).toLocaleString('id-ID');
-function usahaUI(){const tabs=[['sampah','♻ Sampah'],['air','💧 Air'],['gas','🔥 Gas'],['lain','📝 Lain']];
+function usahaUI(){usF='';const tabs=[['sampah','♻ Sampah'],['air','💧 Air'],['gas','🔥 Gas'],['lain','📝 Lain']];
  $('#m').innerHTML=`<div class="card"><div class="row" style="grid-template-columns:repeat(4,1fr)">${tabs.map(t=>`<button class="${um===t[0]?'':'o'}" style="padding:8px 2px;font-size:12px" onclick="um='${t[0]}';usahaUI()">${t[1]}</button>`).join('')}</div></div><div id="uf"></div>`;
  um==='lain'?$('#uf').innerHTML=genHtml(tm()):trxForm(um)}
 function trxForm(k){const L=katList(k),s=k==='sampah',jd={sampah:'♻ Pengumpulan Sampah Non Organik',air:'💧 Penjualan Air Mineral',gas:'🔥 Penjualan Gas'}[k];
@@ -444,11 +589,32 @@ function trxForm(k){const L=katList(k),s=k==='sampah',jd={sampah:'♻ Pengumpula
  <div class="stat" style="text-align:left;margin:6px 0">Harga satuan: <b id="uh" style="display:inline;font-size:16px"></b></div>
  <input id="uq" type="number" inputmode="decimal" min="0" step="${s?'0.01':'1'}" placeholder="${s?'Berat hasil penimbangan (kg)':'Jumlah terjual'}" oninput="hitung()">
  <div class="stat" style="text-align:left;margin:6px 0">Total: <b id="ut" style="display:inline;font-size:18px">Rp 0</b></div>
- <textarea id="ukt" placeholder="${s?'Asal setoran (blok / nama)':'Pembeli (blok / no. rumah / nama)'}"></textarea>${B(s?'📷 Foto Timbangan & Simpan':'📷 Foto & Simpan','kirimUsaha')}</div>`
+ <textarea id="ukt" placeholder="${s?'Asal setoran (blok / nama)':'Pembeli (blok / no. rumah / nama)'}"></textarea>${usFotoBox()}${B('💾 Simpan Transaksi','kirimUsaha')}</div>`
  :'<div class="card">Katalog harga belum tersedia. Minta Admin mengisi Admin → Katalog, lalu buka aplikasi saat online.</div>';if(L.length)hitung()}
 function hitung(){const x=katList(um)[$('#uj').value],q=parseFloat($('#uq').value)||0;$('#uh').textContent=rp(x.harga)+' / '+x.satuan;$('#ut').textContent=rp(q*x.harga)}
+// ===== Animasi proses pada tombol submit =====
+function btnProc(b,t){if(!b||!b.classList)return{text(){},async ok(){},async fail(){},end(){}};if(b._p)return b._p;
+ const orig=b.innerHTML,set=x=>{b.innerHTML='<span class="bsp"></span><span class="btx">'+x+'</span><i class="bbar"></i>'};
+ b.disabled=true;b.classList.add('proc');set(t||'Memproses…');
+ const P=b._p={text:set,
+  async ok(x,keep){b.classList.remove('proc');b.classList.add('okk');b.innerHTML='<span class="bck">✔</span><span class="btx">'+(x||'Tersimpan')+'</span>';await slp(keep?700:1000);if(!keep)P.end()},
+  async fail(x){b.classList.remove('proc');b.classList.add('errb');b.innerHTML='<span class="bck">✕</span><span class="btx">'+(x||'Gagal')+'</span>';await slp(1200);P.end()},
+  end(){b.classList.remove('proc','okk','errb');b.innerHTML=orig;b.disabled=false;b._p=null}};return P}
+// ===== Unit Usaha: foto opsional =====
+let usF='';
+const isUU=()=>S.user.tim==='unitusaha';
+function usFotoInner(){return usF?`<div class="ufpv"><img src="${usF}" alt="Foto bukti"><div><small>✔ Foto terlampir</small><button class="o" style="width:auto;padding:8px 14px" onclick="usFotoDel()">✕ Hapus foto</button></div></div><button class="o" onclick="usSnap(this)"><span class="sp"></span>🔄 Ganti Foto</button>`:`<button class="o" onclick="usSnap(this)"><span class="sp"></span>📷 Ambil Foto (opsional)</button>`}
+const usFotoBox=()=>`<label style="font-size:12px;color:var(--g)">Foto bukti / timbangan <b>(opsional)</b></label><div id="ufc">${usFotoInner()}</div>`;
+function usFotoRender(){const e=$('#ufc');if(e)e.innerHTML=usFotoInner()}
+function usFotoDel(){usF='';usFotoRender()}
+async function usSnap(b){b.classList.add('busy');try{const f=await shot(null);if(f){usF=f;usFotoRender()}}catch(e){}finally{b.classList.remove('busy')}} // Unit Usaha: tanpa menunggu GPS
 async function kirimUsaha(b){const x=katList(um)[$('#uj').value],q=parseFloat($('#uq').value);if(!(q>0))return toast('⚠ Isi '+(um==='sampah'?'berat':'jumlah')+' dengan benar');if(um!=='sampah'&&!Number.isInteger(q))return toast('⚠ Jumlah harus bilangan bulat');
- const g=await gps(),f=await shot(g);if(f){const r=await send('usaha',{kategori:um,jenis:x.jenis,satuan:x.satuan,harga:+x.harga,qty:q,ket:$('#ukt').value,lat:g.lat,lng:g.lng,foto:f},b);if(r.ok){$('#uq').value='';$('#ukt').value='';hitung()}}}
+ const P=btnProc(b,'Menyimpan transaksi…'); // Unit Usaha: tanpa pengambilan lokasi (GPS) agar cepat
+ try{const [r]=await Promise.all([send('usaha',{kategori:um,jenis:x.jenis,satuan:x.satuan,harga:+x.harga,qty:q,ket:$('#ukt').value,foto:usF||''}),slp(450)]); // minimal 0,45 dtk agar animasi terlihat
+  if(!r.ok)return P.fail('Gagal menyimpan');
+  $('#uq').value='';$('#ukt').value='';usF='';usFotoRender();hitung();
+  await P.ok(r.queued?'Tersimpan di HP':'Transaksi tersimpan')}
+ catch(e){P.fail('Gagal, coba lagi')}}
 async function usRep(mode){const r=await api('sumUsaha',{mode,tanggal:ltg,bulan:lbln},null,1);if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
  const d=r.data,smp=mode==='sampah',hr=lpm==='hari',H=hr?d.harian:d.bulanan,kt={air:'Air Mineral',gas:'Gas'};
  let h=`<b>${smp?'Pengumpulan Sampah Non Organik':'Penjualan Air Mineral & Gas'} ${hr?d.tanggal:d.bulan}</b>`+stat(smp?[['Total berat (kg)',H.qty],['Nilai',rp(H.total)],['Transaksi',H.trx]]:[['Omzet',rp(H.total)],['Transaksi',H.trx]]);
@@ -618,9 +784,6 @@ let sm='tamu',TM=[],tmF={tamu:'',id:''},tmG=null;
 const jm=t=>/Z$/.test(String(t))?new Date(t).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):fmt(String(t)).slice(11);
 function secUI(){const tabs=[['tamu','👥 Tamu'],['kg','📋 Kegiatan'],['pat','🛡 Patroli']];
  $('#m').innerHTML=`<div class="card"><div class="row" style="grid-template-columns:repeat(3,1fr)">${tabs.map(t=>`<button class="${sm===t[0]?'':'o'}" onclick="sm='${t[0]}';secUI()">${t[1]}</button>`).join('')}</div></div><div id="sc"></div>`;({tamu:tamuUI,kg:kgUI,pat:patrolUI})[sm]()}
-function patrolUI(){if(S.user.patroli==='tidak')return $('#sc').innerHTML='<div class="card">Anda tidak terdaftar sebagai petugas patroli. Hubungi SPV/Admin.</div>';
- patStat().then(d=>{const e=$('#ps');if(e)e.innerHTML=d.map(chip).join('')||'Belum ada titik'});
- $('#sc').innerHTML=`<div class="card"><b>Status Patroli per Blok</b><div id="ps">Memuat…</div></div><div class="card"><b>Patroli Rutin</b><p style="color:var(--g);font-size:13px">Setiap ${cfg.interval_patroli_jam} jam, wajib tiap blok. Scan barcode di titik, GPS dicek.</p>${B('📷 Scan Barcode & Foto','patrol')}</div>`}
 let QN=0;
 const myQ=async()=>(await qAll()).filter(x=>x.user===S.user.username);
 const qbar=()=>QN?`<div class="card" style="display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:13px"><span>⏳ ${QN} data menunggu sinkron</span><button class="o syncb" style="width:auto;margin:0" onclick="sync(this)"><span class="sp"></span>⟳ Sinkronkan</button></div>`:'';
@@ -719,10 +882,10 @@ async function send(a,d,btn){const it={uid:uid(),a,d:{...d,ts:new Date().toISOSt
  if(navigator.onLine){const r=await api(a,{...it.d,uid:it.uid},btn,1);if(!r.net&&!r.expired)return r}
  it.d.off=1;await qPut(it);badge();toast(a==='darurat'?'🚨 Darurat tersimpan, dikirim otomatis saat ada sinyal':'📴 Tersimpan di HP, dikirim otomatis saat online');return{ok:true,queued:true}}
 // Offline-first: simpan ke antrean HP lebih dulu (instan), dikirim otomatis tiap 3 menit bila ada antrean, atau tombol Sinkronkan
-async function sendQ(a,d,b){if(b){b.disabled=true;setTimeout(()=>{b.disabled=false},1500)}const it={uid:uid(),a,d:{...d,ts:new Date().toISOString()},user:S.user.username,st:'wait'};if(!navigator.onLine)it.d.off=1;await qPut(it);badge();toast('💾 Tersimpan di HP. Terkirim otomatis ≤3 menit atau tekan ⟳ Sinkronkan');return{ok:true,queued:true}}
+async function sendQ(a,d,b,quiet){if(b){b.disabled=true;setTimeout(()=>{b.disabled=false},1500)}const it={uid:uid(),a,d:{...d,ts:new Date().toISOString()},user:S.user.username,st:'wait'};if(!navigator.onLine)it.d.off=1;await qPut(it);badge();if(!quiet)toast('💾 Tersimpan di HP. Terkirim otomatis ≤3 menit atau tekan ⟳ Sinkronkan');return{ok:true,queued:true,uid:it.uid}}
 async function badge(){if(!S||!$('#sn'))return;let n=0;try{n=(await qAll()).filter(x=>x.user===S.user.username).length}catch(e){}$('#sn').textContent=(navigator.onLine?'':'📴 ')+'⟳'+(n?' '+n:'')}
 let syncFail=0,syncNext=0;
-async function sync(btn,auto){if(syncing||!S)return;
+async function sync(btn,auto,quiet){if(syncing||!S)return;
  if(auto){if(Date.now()<syncNext)return;try{if(!(await myQ()).some(x=>x.st!=='rej'))return}catch(e){return} /* tanpa antrean: tidak perlu sinkron */ await new Promise(r=>setTimeout(r,Math.random()*15000));if(syncing||!S)return} // jeda acak: cegah 80 HP mengirim bersamaan
  syncing=true;const sp=document.querySelectorAll('.syncb');sp.forEach(x=>x.classList.add('busy'));let ok=0,bad=0,stop='';
  try{const L=(await qAll()).filter(x=>x.user===S.user.username&&x.st!=='rej').sort((a,b)=>new Date(a.d.ts)-new Date(b.d.ts));
@@ -733,7 +896,7 @@ async function sync(btn,auto){if(syncing||!S)return;
  if(stop==='net'){syncFail=Math.min(syncFail+1,5);syncNext=Date.now()+Math.min(300000,20000*2**syncFail)}else if(!stop){syncFail=0;syncNext=0} // backoff bila offline/server sibuk
  if(stop==='old'){toast('⚠ Server belum diperbarui (Code.gs). Data tetap tersimpan di HP.');return}
  if(stop==='exp'){toast('🔐 Sesi habis. Login ulang untuk sinkronisasi');logout();return}
- if(ok||bad||!auto)toast(stop==='net'?'📴 Belum ada koneksi, data tetap tersimpan':ok||bad?`✔ ${ok} data tersinkron${bad?`, ⚠ ${bad} ditolak`:''}`:'✔ Tidak ada data untuk disinkronkan');
+ if(!quiet&&(ok||bad||!auto))toast(stop==='net'?'📴 Belum ada koneksi, data tetap tersimpan':ok||bad?`✔ ${ok} data tersinkron${bad?`, ⚠ ${bad} ditolak`:''}`:'✔ Tidak ada data untuk disinkronkan');
  if(ok||bad){if($('#vw-tamu'))tamuUI();else if($('#vw-kg'))kgUI();else if($('#vw-tk'))tkList()}
  if(tab==='home'&&(ok||bad))home()}
 async function qrm(u){if(!confirm('Hapus data yang ditolak ini?'))return;await qDel(u);badge();home()}
@@ -976,6 +1139,202 @@ function html(m){let h='<div class="rp-doc">'+(m.meta?'<div class="rp-meta">'+E(
   }
   return h+'</div>'}
 G.RPT={pdf,xlsx,html,clean,tw,wrap};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<!-- Decoder QR Code (JavaScript murni) untuk scan di peramban tanpa BarcodeDetector -->
+<script>
+/* ===== SIAGA QR decoder (JavaScript murni, tanpa pustaka luar) =====
+   Mendukung QR Code versi 1-14, semua level koreksi kesalahan, mode numerik/alfanumerik/byte. */
+(function(G){
+'use strict';
+const RSB=[[[[1,26,19]],[[1,26,16]],[[1,26,13]],[[1,26,9]]],[[[1,44,34]],[[1,44,28]],[[1,44,22]],[[1,44,16]]],[[[1,70,55]],[[1,70,44]],[[2,35,17]],[[2,35,13]]],[[[1,100,80]],[[2,50,32]],[[2,50,24]],[[4,25,9]]],[[[1,134,108]],[[2,67,43]],[[2,33,15],[2,34,16]],[[2,33,11],[2,34,12]]],[[[2,86,68]],[[4,43,27]],[[4,43,19]],[[4,43,15]]],[[[2,98,78]],[[4,49,31]],[[2,32,14],[4,33,15]],[[4,39,13],[1,40,14]]],[[[2,121,97]],[[2,60,38],[2,61,39]],[[4,40,18],[2,41,19]],[[4,40,14],[2,41,15]]],[[[2,146,116]],[[3,58,36],[2,59,37]],[[4,36,16],[4,37,17]],[[4,36,12],[4,37,13]]],[[[2,86,68],[2,87,69]],[[4,69,43],[1,70,44]],[[6,43,19],[2,44,20]],[[6,43,15],[2,44,16]]],[[[4,101,81]],[[1,80,50],[4,81,51]],[[4,50,22],[4,51,23]],[[3,36,12],[8,37,13]]],[[[2,116,92],[2,117,93]],[[6,58,36],[2,59,37]],[[4,46,20],[6,47,21]],[[7,42,14],[4,43,15]]],[[[4,133,107]],[[8,59,37],[1,60,38]],[[8,44,20],[4,45,21]],[[12,33,11],[4,34,12]]],[[[3,145,115],[1,146,116]],[[4,64,40],[5,65,41]],[[11,36,16],[5,37,17]],[[11,36,12],[5,37,13]]]];
+const ALIGN=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66]];
+// ---------- GF(256) & Reed-Solomon ----------
+const EXP=new Uint8Array(512),LOG=new Uint8Array(256);
+(()=>{let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&256)x^=0x11D}for(let i=255;i<512;i++)EXP[i]=EXP[i-255]})();
+const gm=(a,b)=>a&&b?EXP[LOG[a]+LOG[b]]:0, ginv=a=>EXP[255-LOG[a]];
+function rsDecode(cw,nec){
+  const n=cw.length,S=new Array(nec).fill(0);let any=false;
+  for(let i=0;i<nec;i++){let s=0;for(let j=0;j<n;j++)s=gm(s,EXP[i])^cw[j];S[i]=s;if(s)any=true}
+  if(!any)return cw;
+  let sig=[1],B=[1],L=0,m=1,b=1;
+  for(let k=0;k<nec;k++){let d=S[k];for(let i=1;i<=L;i++)d^=gm(sig[i]||0,S[k-i]);
+    if(d===0){m++;continue}
+    const T=sig.slice(),coef=gm(d,ginv(b)),sz=Math.max(sig.length,B.length+m);while(sig.length<sz)sig.push(0);
+    for(let i=0;i<B.length;i++)sig[i+m]^=gm(coef,B[i]);
+    if(2*L<=k){L=k+1-L;B=T;b=d;m=1}else m++}
+  if(L>(nec>>1))return null;
+  const pos=[];
+  for(let p=0;p<n;p++){const xinv=EXP[(255-((n-1-p)%255))%255];let v=0,xp=1;for(let i=0;i<sig.length;i++){v^=gm(sig[i],xp);xp=gm(xp,xinv)}if(v===0)pos.push(p)}
+  if(pos.length!==L)return null;
+  const om=new Array(nec).fill(0);for(let i=0;i<nec;i++){let v=0;for(let j=0;j<=i&&j<sig.length;j++)v^=gm(sig[j],S[i-j]);om[i]=v}
+  const out=cw.slice();
+  for(const p of pos){const X=EXP[(n-1-p)%255],xinv=ginv(X);let o=0,xp=1;for(let i=0;i<nec;i++){o^=gm(om[i],xp);xp=gm(xp,xinv)}
+    let d=0;xp=1;for(let i=1;i<sig.length;i+=2){d^=gm(sig[i],xp);xp=gm(xp,gm(xinv,xinv))}
+    if(!d)return null;out[p]^=gm(X,gm(o,ginv(d)))}
+  for(let i=0;i<nec;i++){let s=0;for(let j=0;j<n;j++)s=gm(s,EXP[i])^out[j];if(s)return null}
+  return out}
+// ---------- format info ----------
+const FMT=[];(()=>{for(let d=0;d<32;d++){let v=d<<10;for(let i=14;i>=10;i--)if((v>>i)&1)v^=0x537<<(i-10);FMT.push([((d<<10)|(v&0x3FF))^0x5412,d])}})();
+const pop=x=>{let c=0;while(x){c+=x&1;x>>=1}return c};
+function readFormat(M,dim){const g=(r,c)=>M[r*dim+c];
+  let a=0;for(let i=0;i<6;i++)a=(a<<1)|g(8,i);a=(a<<1)|g(8,7);a=(a<<1)|g(8,8);a=(a<<1)|g(7,8);for(let j=5;j>=0;j--)a=(a<<1)|g(j,8);
+  let b=0;for(let j=dim-1;j>=dim-7;j--)b=(b<<1)|g(j,8);for(let i=dim-8;i<dim;i++)b=(b<<1)|g(8,i);
+  let best=null,bd=4;for(const [code,d] of FMT){const x=Math.min(pop(code^a),pop(code^b));if(x<bd){bd=x;best=d}}
+  return best===null?null:{ec:[1,0,3,2][(best>>3)&3],mask:best&7}}
+// ---------- baca matriks ----------
+function isFn(r,c,dim,v){
+  if(r<9&&c<9)return true;if(r<9&&c>=dim-8)return true;if(r>=dim-8&&c<9)return true;
+  if(r===6||c===6)return true;
+  if(v>=7){if(r<6&&c>=dim-11&&c<dim-8)return true;if(c<6&&r>=dim-11&&r<dim-8)return true}
+  const al=ALIGN[v];for(let i=0;i<al.length;i++)for(let j=0;j<al.length;j++){
+    if((i===0&&j===0)||(i===0&&j===al.length-1)||(i===al.length-1&&j===0))continue;
+    if(Math.abs(r-al[i])<=2&&Math.abs(c-al[j])<=2)return true}
+  return false}
+const MASK=[(i,j)=>(i+j)%2===0,(i,j)=>i%2===0,(i,j)=>j%3===0,(i,j)=>(i+j)%3===0,(i,j)=>(((i>>1)+Math.floor(j/3))%2)===0,(i,j)=>((i*j)%2+(i*j)%3)===0,(i,j)=>(((i*j)%2+(i*j)%3)%2)===0,(i,j)=>((((i+j)%2)+(i*j)%3)%2)===0];
+function decodeMatrix(M,dim){
+  const v=(dim-17)/4;if(v<1||v>14||v!==Math.floor(v))return null;
+  const f=readFormat(M,dim);if(!f)return null;
+  const mk=MASK[f.mask],raw=[];let cur=0,nb=0,up=true;
+  for(let j=dim-1;j>0;j-=2){if(j===6)j--;
+    for(let k=0;k<dim;k++){const i=up?dim-1-k:k;
+      for(let c=0;c<2;c++){const cc=j-c;if(isFn(i,cc,dim,v))continue;
+        cur=(cur<<1)|(M[i*dim+cc]^(mk(i,cc)?1:0));if(++nb===8){raw.push(cur);cur=0;nb=0}}}
+    up=!up}
+  const grp=RSB[v-1][f.ec],blocks=[];
+  grp.forEach(g=>{for(let i=0;i<g[0];i++)blocks.push({tot:g[1],dat:g[2],cw:[]})});
+  blocks.sort((a,b)=>a.dat-b.dat);
+  const total=blocks.reduce((s,b)=>s+b.tot,0);if(raw.length<total)return null;
+  const maxD=blocks[blocks.length-1].dat,nec=blocks[0].tot-blocks[0].dat;let p=0;
+  for(let i=0;i<maxD;i++)for(const b of blocks)if(i<b.dat)b.cw[i]=raw[p++];
+  for(let i=0;i<nec;i++)for(const b of blocks)b.cw[b.dat+i]=raw[p++];
+  const data=[];
+  for(const b of blocks){const r=rsDecode(b.cw,nec);if(!r)return null;for(let i=0;i<b.dat;i++)data.push(r[i])}
+  return parseData(data,v)}
+function parseData(d,v){
+  let bit=0;const total=d.length*8;
+  const rd=n=>{let x=0;for(let i=0;i<n;i++){x=(x<<1)|((d[bit>>3]>>(7-(bit&7)))&1);bit++}return x};
+  const AN='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';let out='';const bytes=[];
+  const flush=()=>{if(bytes.length){try{out+=new TextDecoder('utf-8',{fatal:true}).decode(new Uint8Array(bytes))}catch(e){out+=String.fromCharCode.apply(null,bytes)}bytes.length=0}};
+  while(bit+4<=total){const mode=rd(4);if(mode===0)break;
+    if(mode===1){let n=rd(v<10?10:12);while(n>=3){out+=String(rd(10)).padStart(3,'0');n-=3}if(n===2)out+=String(rd(7)).padStart(2,'0');else if(n===1)out+=String(rd(4))}
+    else if(mode===2){let n=rd(v<10?9:11);while(n>=2){const x=rd(11);out+=AN[Math.floor(x/45)]+AN[x%45];n-=2}if(n===1)out+=AN[rd(6)]}
+    else if(mode===4){let n=rd(v<10?8:16);for(let i=0;i<n;i++)bytes.push(rd(8));flush()}
+    else if(mode===7){const b=rd(8);if(b&128)rd(b&64?16:8)}
+    else return null}
+  flush();return out}
+// ---------- binarisasi (adaptif per blok) ----------
+function binarize(rgba,w,h){
+  const lum=new Uint8Array(w*h);for(let i=0,p=0;i<w*h;i++,p+=4)lum[i]=(rgba[p]*306+rgba[p+1]*601+rgba[p+2]*117)>>10;
+  const bits=new Uint8Array(w*h);
+  if(w<40||h<40){let s=0;for(let i=0;i<lum.length;i++)s+=lum[i];const t=s/lum.length;for(let i=0;i<lum.length;i++)bits[i]=lum[i]<=t?1:0;return bits}
+  const bw=(w+7)>>3,bh=(h+7)>>3,bp=new Uint8Array(bw*bh);
+  for(let by=0;by<bh;by++)for(let bx=0;bx<bw;bx++){
+    let sum=0,mn=255,mx=0;const x0=Math.min(bx*8,w-8),y0=Math.min(by*8,h-8);
+    for(let yy=0;yy<8;yy++){const o=(y0+yy)*w+x0;for(let xx=0;xx<8;xx++){const q=lum[o+xx];sum+=q;if(q<mn)mn=q;if(q>mx)mx=q}}
+    let avg;if(mx-mn>24)avg=sum>>6;else{avg=mn>>1;if(by>0&&bx>0){const nb=(bp[(by-1)*bw+bx]+2*bp[by*bw+bx-1]+bp[(by-1)*bw+bx-1])>>2;if(mn<nb)avg=nb}}
+    bp[by*bw+bx]=avg}
+  const cl=(x,a,b)=>x<a?a:x>b?b:x;
+  for(let by=0;by<bh;by++)for(let bx=0;bx<bw;bx++){
+    const cx=cl(bx,2,bw-3),cy=cl(by,2,bh-3);let s=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)s+=bp[(cy+dy)*bw+cx+dx];const t=s/25;
+    const x0=Math.min(bx*8,w-8),y0=Math.min(by*8,h-8);
+    for(let yy=0;yy<8;yy++){const o=(y0+yy)*w+x0;for(let xx=0;xx<8;xx++)bits[o+xx]=lum[o+xx]<=t?1:0}}
+  return bits}
+// ---------- pola finder ----------
+function okRatio(r){const t=r[0]+r[1]+r[2]+r[3]+r[4];if(t<7)return false;const m=t/7,v=m/2;
+  return Math.abs(r[0]-m)<v&&Math.abs(r[1]-m)<v&&Math.abs(r[2]-3*m)<3*v&&Math.abs(r[3]-m)<v&&Math.abs(r[4]-m)<v}
+function cross(bits,w,h,cx,cy,dx,dy,maxc,orig){
+  const at=(i)=>{const x=cx+dx*i,y=cy+dy*i;return(x<0||y<0||x>=w||y>=h)?-1:bits[y*w+x]};
+  const s=[0,0,0,0,0];let i=0;
+  while(at(i)===1){s[2]++;i--}if(at(i)===-1)return null;
+  while(at(i)===0&&s[1]<=maxc){s[1]++;i--}if(at(i)===-1||s[1]>maxc)return null;
+  while(at(i)===1&&s[0]<=maxc){s[0]++;i--}if(s[0]>maxc)return null;
+  i=1;while(at(i)===1){s[2]++;i++}if(at(i)===-1)return null;
+  while(at(i)===0&&s[3]<maxc){s[3]++;i++}if(at(i)===-1||s[3]>=maxc)return null;
+  while(at(i)===1&&s[4]<maxc){s[4]++;i++}if(s[4]>=maxc)return null;
+  const t=s[0]+s[1]+s[2]+s[3]+s[4];if(5*Math.abs(t-orig)>=2*orig)return null;
+  if(!okRatio(s))return null;return{c:i-s[4]-s[3]-s[2]/2,m:t/7}}
+function findFinders(bits,w,h){
+  const C=[];
+  for(let y=0;y<h;y++){
+    const row=y*w,runs=[],vals=[];let cur=bits[row],len=1;
+    for(let x=1;x<=w;x++){const v=x<w?bits[row+x]:-1;
+      if(v===cur){len++;continue}
+      runs.push(len);vals.push(cur);const k=runs.length-1;
+      if(k>=4&&vals[k]===1&&vals[k-4]===1){const r=[runs[k-4],runs[k-3],runs[k-2],runs[k-1],runs[k]];
+        if(okRatio(r)){const tot=r[0]+r[1]+r[2]+r[3]+r[4],cx=Math.round(x-r[4]-r[3]-r[2]/2),m=tot/7;
+          const vy=cross(bits,w,h,cx,y,0,1,Math.ceil(tot*1.5),tot);
+          if(vy){const cy=Math.round(y+vy.c),hx=cross(bits,w,h,cx,cy,1,0,Math.ceil(tot*1.5),tot);
+            if(hx){const fx=cx+hx.c,fy=y+vy.c,ms=(m+vy.m+hx.m)/3;let hit=false;
+              for(const c of C){if(Math.abs(c.x-fx)<=c.m*1.5&&Math.abs(c.y-fy)<=c.m*1.5&&Math.abs(c.m-ms)<=c.m*0.5+0.5){const n=c.n;c.x=(c.x*n+fx)/(n+1);c.y=(c.y*n+fy)/(n+1);c.m=(c.m*n+ms)/(n+1);c.n=n+1;hit=true;break}}
+              if(!hit)C.push({x:fx,y:fy,m:ms,n:1})}}}}
+      cur=v;len=1}}
+  return C.filter(c=>c.n>=2).sort((a,b)=>b.n-a.n).slice(0,14)}
+function triples(C){
+  const out=[];
+  for(let i=0;i<C.length;i++)for(let j=i+1;j<C.length;j++)for(let k=j+1;k<C.length;k++){
+    const P=[C[i],C[j],C[k]],ms=P.map(p=>p.m);if(Math.max(...ms)/Math.min(...ms)>1.7)continue;
+    const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),dd=[d(P[1],P[2]),d(P[0],P[2]),d(P[0],P[1])];
+    let hi=0;for(let q=1;q<3;q++)if(dd[q]>dd[hi])hi=q;
+    const tl=P[hi],o=P.filter((_,q)=>q!==hi),a=d(tl,o[0]),b=d(tl,o[1]),hyp=dd[hi];
+    const s1=Math.abs(a-b)/Math.max(a,b),s2=Math.abs(hyp-Math.hypot(a,b))/hyp;if(s1>0.35||s2>0.25)continue;
+    let tr=o[0],bl=o[1];const cr=(tr.x-tl.x)*(bl.y-tl.y)-(tr.y-tl.y)*(bl.x-tl.x);if(cr<0){tr=o[1];bl=o[0]}
+    out.push({tl,tr,bl,score:s1+s2-0.02*Math.min(P[0].n,P[1].n,P[2].n)})}
+  return out.sort((a,b)=>a.score-b.score)}
+// ---------- transformasi & sampling ----------
+function homography(src,dst){ // 4 titik -> 8 parameter
+  const A=[],B=[];for(let i=0;i<4;i++){const [x,y]=src[i],[u,v]=dst[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);B.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);B.push(v)}
+  const n=8;for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[p][i]))p=r;
+    if(Math.abs(A[p][i])<1e-12)return null;[A[i],A[p]]=[A[p],A[i]];[B[i],B[p]]=[B[p],B[i]];
+    for(let r=0;r<n;r++){if(r===i)continue;const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];B[r]-=f*B[i]}}
+  return B.map((b,i)=>b/A[i][i])}
+const hp=(H,x,y)=>{const d=H[6]*x+H[7]*y+1;return[(H[0]*x+H[1]*y+H[2])/d,(H[3]*x+H[4]*y+H[5])/d]};
+function affine(f,dim){const ux=(f.tr.x-f.tl.x)/(dim-7),uy=(f.tr.y-f.tl.y)/(dim-7),vx=(f.bl.x-f.tl.x)/(dim-7),vy=(f.bl.y-f.tl.y)/(dim-7);
+  return(mx,my)=>[f.tl.x+(mx-3.5)*ux+(my-3.5)*vx,f.tl.y+(mx-3.5)*uy+(my-3.5)*vy]}
+function findAlign(bits,w,h,T,dim,ms){
+  const c0=T(dim-6.5,dim-6.5),R=Math.max(3,Math.round(ms*3.2));let best=null,bs=-1;
+  const ux=T(dim-5.5,dim-6.5),vx=T(dim-6.5,dim-5.5),ax=ux[0]-c0[0],ay=ux[1]-c0[1],bx=vx[0]-c0[0],by=vx[1]-c0[1];
+  for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){const cx=c0[0]+dx,cy=c0[1]+dy;let sc=0;
+    for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++){const x=Math.round(cx+j*ax+i*bx),y=Math.round(cy+j*ay+i*by);if(x<0||y<0||x>=w||y>=h)continue;
+      const ring=Math.max(Math.abs(i),Math.abs(j)),want=ring===1?0:1;if(bits[y*w+x]===want)sc++}
+    if(sc>bs){bs=sc;best=[cx,cy]}}
+  return bs>=22?best:null}
+function sampleMatrix(bits,w,h,tf,dim){
+  const M=new Uint8Array(dim*dim),at=(x,y)=>{x=Math.round(x);y=Math.round(y);return(x<0||y<0||x>=w||y>=h)?0:bits[y*w+x]};
+  for(let r=0;r<dim;r++)for(let c=0;c<dim;c++){
+    const o=[[0,0],[-.25,0],[.25,0],[0,-.25],[0,.25]];let s=0;
+    for(const [ox,oy] of o){const p=tf(c+.5+ox,r+.5+oy);s+=at(p[0],p[1])}
+    M[r*dim+c]=s>=3?1:0}
+  return M}
+let DEAD=0;const now=()=>(typeof performance!=='undefined'?performance.now():Date.now());
+function tryFinder(bits,w,h,f){
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),leg=(d(f.tl,f.tr)+d(f.tl,f.bl))/2,ms=(f.tl.m+f.tr.m+f.bl.m)/3;
+  // ukuran modul dari lebar pola finder searah sumbu kode (tahan rotasi)
+  const ax=(f.tr.x-f.tl.x),ay=(f.tr.y-f.tl.y),al=Math.hypot(ax,ay),bx=(f.bl.x-f.tl.x),by=(f.bl.y-f.tl.y),bl=Math.hypot(bx,by);
+  const ext=(p,ux,uy)=>{let tot=0;for(const sg of [1,-1]){let t=0,tr=0,st=1;const px=(i)=>{const x=Math.round(p.x+sg*ux*i),y=Math.round(p.y+sg*uy*i);return(x<0||y<0||x>=w||y>=h)?-1:bits[y*w+x]};
+      let prev=1,i=0;while(i<p.m*6&&tr<3){i+=0.5;const q=px(i);if(q===-1)return 0;if(q!==prev){tr++;prev=q}}t=i;tot+=t}return tot/7};
+  const mA=[ext(f.tl,ax/al,ay/al),ext(f.tr,ax/al,ay/al),ext(f.bl,ax/al,ay/al),ext(f.tl,bx/bl,by/bl),ext(f.tr,bx/bl,by/bl),ext(f.bl,bx/bl,by/bl)].filter(x=>x>0);
+  const m=mA.length>=3?mA.reduce((s,x)=>s+x,0)/mA.length:ms,est=Math.round(leg/m+7),v0=Math.round((est-17)/4),res=[];
+  for(const v of [v0,v0+1,v0-1,v0+2,v0-2]){if(v<1||v>14||res.includes(v))continue;res.push(v)}
+  for(const v of res){const dim=17+4*v;let tf=affine(f,dim),M=sampleMatrix(bits,w,h,tf,dim),t=decodeMatrix(M,dim);if(t!==null)return t;
+    if(v>=2){const ap=findAlign(bits,w,h,tf,dim,m);if(ap){const Hh=homography([[3.5,3.5],[dim-3.5,3.5],[3.5,dim-3.5],[dim-6.5,dim-6.5]],[[f.tl.x,f.tl.y],[f.tr.x,f.tr.y],[f.bl.x,f.bl.y],ap]);
+      if(Hh){M=sampleMatrix(bits,w,h,(x,y)=>hp(Hh,x,y),dim);t=decodeMatrix(M,dim);if(t!==null)return t}}}}
+  // perspektif kuat: cari posisi sudut kanan-bawah yang membuat RS lolos (urut dari yang paling dekat prediksi affine)
+  for(const v of res.slice(0,2)){const dim=17+4*v,b0=[f.tr.x+f.bl.x-f.tl.x,f.tr.y+f.bl.y-f.tl.y],st=m*0.6,R=7,tr=[];
+    for(let i=-R;i<=R;i++)for(let j=-R;j<=R;j++)tr.push([i,j]);tr.sort((p,q)=>(p[0]*p[0]+p[1]*p[1])-(q[0]*q[0]+q[1]*q[1]));
+    const src=[[3.5,3.5],[dim-3.5,3.5],[3.5,dim-3.5],[dim-3.5,dim-3.5]];
+    for(const [i,j] of tr){if(now()>DEAD)return null;const Hh=homography(src,[[f.tl.x,f.tl.y],[f.tr.x,f.tr.y],[f.bl.x,f.bl.y],[b0[0]+i*st,b0[1]+j*st]]);if(!Hh)continue;
+      const t=decodeMatrix(sampleMatrix(bits,w,h,(x,y)=>hp(Hh,x,y),dim),dim);if(t!==null)return t}}
+  return null}
+function decodeBits(bits,w,h){
+  const C=findFinders(bits,w,h);if(C.length<3)return null;
+  const T=triples(C).slice(0,4);for(const f of T){if(now()>DEAD)return null;const t=tryFinder(bits,w,h,f);if(t!==null)return t}return null}
+function decode(rgba,w,h,budget){
+  DEAD=now()+(budget||70); // batas waktu per frame agar tampilan tidak tersendat
+  const bits=binarize(rgba,w,h);let t=decodeBits(bits,w,h);if(t!==null)return t;if(now()>DEAD)return null;
+  const inv=new Uint8Array(bits.length);for(let i=0;i<bits.length;i++)inv[i]=bits[i]^1;return decodeBits(inv,w,h)}
+G.QRDEC={decode,rsDecode,_:{binarize,findFinders,decodeMatrix}};
 })(typeof window!=='undefined'?window:globalThis);
 
 </script>
