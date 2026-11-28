@@ -5,6 +5,9 @@
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#1558d6"><link rel="manifest" href="manifest.json"><title>SIAGA</title>
 <style>
+.kbc{display:inline-block;padding:7px 12px;margin:3px 5px 3px 0;border:1.5px solid #c5d3ea;border-radius:18px;font-size:13px;background:#fff;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.kbc.on{background:#1558d6;color:#fff;border-color:#1558d6}.kbc.dn:not(.on){background:#e6f6ec;border-color:#9ad6b3;color:#12805c}
+.kbh{font-size:12px;color:var(--g);margin:8px 0 2px;font-weight:700}
 :root{--b:#1558d6;--b2:#e8f0ff;--t:#16233b;--g:#6b7a90;--bd:#dde5f2}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#f5f8ff;color:var(--t);padding-bottom:70px}
 header{background:var(--b);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
@@ -148,11 +151,15 @@ function dashHtml(d,u,T){const gb=(t,l)=>`<button onclick="go('${t}')">${l}</but
  if(u.tim==='security')h+=`<div class="card"><b>🛡 Tugas Security</b>${stat([['Patroli hari ini',d.patroli||0],['Shift sekarang',d.shift||'-'],['Tamu di dalam',d.tamuDalam||0]])}<div style="font-size:13px;margin:4px 0;line-height:1.6">📅 Jadwal hari ini: <b>${esc(d.jadwal||'belum diatur')}</b><br>📍 Lokasi bertugas: <b>${d.lokasi?esc(d.lokasi.lokasi):'belum diisi'}</b></div><div id="hps">Memuat status blok…</div><div style="font-size:13px;margin:4px 0">📋 Kegiatan hari ini: <b>${(d.kegiatan||{}).hariIni||0}</b> (berlangsung: <b>${(d.kegiatan||{}).berlangsung||0}</b>)</div><div class="row" style="grid-template-columns:repeat(3,1fr)"><button style="padding:10px 2px;font-size:12px" onclick="sm='tamu';go('kerja')">👥 Tamu</button><button style="padding:10px 2px;font-size:12px" onclick="sm='kg';go('kerja')">📋 Kegiatan</button><button class="o" style="padding:10px 2px;font-size:12px" onclick="sm='pat';go('kerja')">🛡 Patroli</button></div></div>`;
  if(['kebersihan','admin'].includes(u.tim)){
    const k=d.kerja||{total:0,jenis:[],blokCount:0,bloks:[]};
-   const trgHtml = u.tim==='kebersihan' ? `<div style="background:#f0f7ff;border:1px solid #cce3ff;padding:8px 10px;border-radius:10px;font-size:12px;margin:8px 0;line-height:1.5">
-     🎯 <b>Target Harian Tim Kebersihan:</b><br>
-     • Cek saluran, potong rumput, ranting & sapu jalan: <b>min. 2 Blok/hari</b> (Tercapai hari ini: <b style="color:${(k.blokCount||0)>=2?'#12805c':'#d92d20'}">${k.blokCount||0} Blok</b>${k.bloks&&k.bloks.length?' ['+esc(k.bloks.join(', '))+']':''})<br>
-     • Pengangkutan sampah: <b>Semua Blok/hari</b><br>
-     • Pembersihan aliran sungai: <b>Berkala</b> (wajib foto sebelum &amp; sesudah)
+   const hr=k.hari,okc=o=>o?'#12805c':'#d92d20',
+    jdw=!hr?'':hr.libur?`<hr style="border:0;border-top:1px dashed #cce3ff"><b>📅 Hari ini LIBUR</b> — Regu 3 <b>PIKET</b> pengangkutan sampah: <b style="color:${okc(hr.tugas[0]&&hr.tugas[0].ok)}">${hr.tugas[0]&&hr.tugas[0].ok?'✔ sudah lapor':'✖ belum lapor'}</b>`
+    :`<hr style="border:0;border-top:1px dashed #cce3ff"><b>📅 Jadwal hari ini: H${hr.no} · ${esc(hr.cluster)} · Blok ${esc(hr.bloks.join(', '))}</b>${hr.tugas.map(t=>`<br>Regu ${t.regu} – ${esc(t.jenis)}: ${t.bloks.map(x=>`<b style="color:${okc(x.ok)}">${esc(x.label)} ${x.ok?'✔':'✖'}</b>`).join(' · ')}`).join('')}`,
+    trgHtml = u.tim==='kebersihan' ? `<div style="background:#f0f7ff;border:1px solid #cce3ff;padding:8px 10px;border-radius:10px;font-size:12px;margin:8px 0;line-height:1.5">
+     🎯 <b>Target Tim Kebersihan:</b><br>
+     • Potong rumput, cek saluran air &amp; potong ranting: <b>seluruh blok selesai dalam 1 bulan</b><br>
+     • Sapu jalan: <b>seluruh jalan utama (blok jadwal) selesai setiap minggu</b><br>
+     • Pengangkutan sampah: <b>bertugas setiap hari</b> (hari libur = piket)<br>
+     • Pembersihan aliran sungai: <b>Berkala</b> (wajib foto sebelum &amp; sesudah)${jdw}
    </div>` : '';
    h+=`<div class="card"><b>${T.ic} Pekerjaan Hari Ini</b>${stat([['Laporan terkirim',k.total],['Blok tergarap',k.blokCount||0]])}${trgHtml}${k.jenis.map(x=>`<div class="news" style="font-size:13px">${esc(x.jenis)}: <b>${x.n}</b></div>`).join('')}${gb('kerja','➕ Lapor Pekerjaan')}</div>`;
  }
@@ -161,7 +168,7 @@ function dashHtml(d,u,T){const gb=(t,l)=>`<button onclick="go('${t}')">${l}</but
  if(u.tim==='ipl'){const p=d.ipl||{target:0,pct:0,realisasi:0,lunas:0,rumah:0,kunjungan:0,bulan:''};h+=`<div class="card"><b>💳 Target IPL ${p.bulan}</b>${p.target?`<div style="background:#e8f0ff;border-radius:6px;height:10px;margin:8px 0"><div style="width:${Math.min(100,p.pct)}%;background:${p.pct>=100?'#12805c':'var(--b)'};height:10px;border-radius:6px"></div></div>${stat([['Capaian',p.pct+'%'],['Terkumpul',rp(p.realisasi)],['Rumah lunas',p.lunas+'/'+p.rumah]])}<small>Kunjungan hari ini: ${p.kunjungan}</small>`:'<p style="font-size:13px;color:var(--g)">Belum ada target bulan ini. Hubungi SPV/Admin.</p>'}${gb('kerja','💳 Catat Penagihan')}</div>`}
  if(u.role!=='user'&&d.awas)h+=`<div class="card"><b>📋 Pengawasan</b>${stat([['Hadir (24 jam)',d.awas.hadir+'/'+d.awas.total],['Tiket aktif',d.awas.tiket],['Telat respon',d.awas.telat||0]])}<div class="row" style="grid-template-columns:1fr 1fr"><button class="o" onclick="go('lap')">📈 Laporan</button><button class="o" onclick="go('admin')">⚙ Admin</button></div></div>`;
  return h}
-const NEED_VER=3.1; // versi Code.gs minimum yang dibutuhkan aplikasi ini
+const NEED_VER=3.2; // versi Code.gs minimum yang dibutuhkan aplikasi ini
 async function home(){let c=null;try{c=JSON.parse(localStorage.siagaHome||'null')}catch(e){}
  const empty={ok:true,berita:[],summary:{},dash:{},cached:1};
  if(c){c.cached=!navigator.onLine;await homeDraw(c)}else $('#m').innerHTML='<div class="card" id="vw-home">Memuat…</div>';
@@ -232,35 +239,70 @@ function kerja(){if(S.user.tim==='security')return secUI();
 
 // ===== Kebersihan & Pekerjaan Umum =====
 let kjFotoSeb='', kjFotoSes='', kjG=null;
-function updateTargetHint(){
-  const j=$('#jn')?$('#jn').value:'', el=$('#targetHint');
-  if(!el)return;
-  if(j==='Pengangkutan Sampah') el.innerHTML='🚛 <b>Target Harian:</b> Pengangkutan sampah mencakup <b>Semua Blok</b> setiap hari. Wajib foto sebelum &amp; sesudah.';
-  else if(j==='Pembersihan Aliran Sungai') el.innerHTML='🌊 <b>Jadwal Berkala:</b> Pembersihan aliran sungai. Sebutkan titik/segmen sungai &amp; wajib foto sebelum &amp; sesudah.';
-  else el.innerHTML='🎯 <b>Target Harian:</b> Minimal <b>2 Blok per hari</b> untuk Cek Saluran Air, Potong Rumput, Potong Ranting &amp; Sapu Jalan. Wajib foto sebelum &amp; sesudah.';
-}
+function updateTargetHint(){kbRender()}
+// ===== Jadwal & target Tim Kebersihan (data dari server, tersimpan di HP untuk mode offline) =====
+let kbD=null,kbSel=new Set(),kbAll=false,kbPre=false;
+try{kbD=JSON.parse(localStorage.siagaKb||'null')}catch(e){}
+const kbNk=s=>String(s||'').trim().toLowerCase(),KB_PER={'Potong Rumput':'b','Cek Saluran Air':'b','Potong Ranting':'b','Sapu Jalan':'m','Pengangkutan Sampah':'h'};
+const kbJenis=()=>$('#jn')?$('#jn').value:'Potong Rumput';
+function kbHariCalc(ds){const J=(kbD&&kbD.jadwal)||[],n=J.length||28,k=Math.round((Date.parse(ds+'T00:00:00Z')-Date.parse((kbD.mulai||'2026-11-02')+'T00:00:00Z'))/864e5),no=((k%n)+n)%n+1,x=J.find(r=>+r.no===no)||{},lib=/libur/i.test(x.kode||'')||!String(x.blok||'').trim();
+ return{no,libur:lib,cluster:lib?'':String(x.cluster||'').trim(),bloks:lib?[]:String(x.blok).split(',').map(s=>s.trim()).filter(Boolean),regu:{1:x.regu1,2:x.regu2,3:x.regu3}}}
+function kbDone(j){return new Set(((kbD&&kbD.selesai&&kbD.selesai[j])||[]).map(kbNk))}
+function kbTarget(j){if(!kbD)return[];const M=kbD.master||[],p=KB_PER[j];if(p==='b')return M;
+ if(j==='Sapu Jalan')return M.filter(b=>kbD.minggu&&b.minggu===kbD.minggu.no);
+ if(j==='Pengangkutan Sampah'){const h=kbHariCalc(tdy());return M.filter(b=>h.bloks.some(x=>kbNk(h.cluster+' - '+x)===b.key))}return[]}
+function kbHdr(){if(!kbD)return'⏳ Memuat jadwal…';const h=kbHariCalc(tdy());
+ return h.libur?`📅 <b>Hari ini LIBUR</b> — Regu 1 &amp; 2 OFF, <b>Regu 3 PIKET</b> (pengangkutan sampah tetap dilaporkan).`
+ :`📅 <b>Jadwal hari ini: H${h.no} · ${esc(h.cluster)} · Blok ${esc(h.bloks.join(', '))}</b><br><small>Regu 1: ${esc(h.regu[1]||'-')} · Regu 2: ${esc(h.regu[2]||'-')} · Regu 3: ${esc(h.regu[3]||'-')}</small>`}
+function kbHint(){const j=kbJenis(),p=KB_PER[j];if(!kbD)return'⏳ Memuat target…';
+ if(!p)return'🌊 <b>Berkala:</b> sebutkan titik/segmen sungai pada kolom lokasi lain. Wajib foto sebelum &amp; sesudah.';
+ const T=kbTarget(j),D=kbDone(j),n=T.length,x=T.filter(b=>D.has(b.key)).length,sisa=T.filter(b=>!D.has(b.key)).map(b=>b.label),
+ lst=sisa.length?'<br><small>Belum: '+esc(sisa.slice(0,10).join(', '))+(sisa.length>10?' +'+(sisa.length-10)+' lagi':'')+'</small>':' <b style="color:#12805c">✔ Tuntas</b>';
+ if(p==='b')return`📅 <b>Target BULANAN:</b> ${esc(j)} di <b>seluruh ${n} blok</b> harus selesai dalam 1 bulan. Bulan ini: <b>${x}/${n}</b> blok.${lst}`;
+ if(p==='m')return`🧹 <b>Target MINGGUAN:</b> sapu seluruh jalan utama blok jadwal minggu ini (<b>${n} blok</b>, ${esc(kbD.minggu.mulai)} s/d ${esc(kbD.minggu.akhir)}). Minggu ini: <b>${x}/${n}</b>.${lst}`;
+ return kbHariCalc(tdy()).libur?'🚛 <b>Target HARIAN:</b> bertugas setiap hari. Hari libur = <b>PIKET</b>: cukup lapor pengangkutan sampah (blok boleh dikosongkan).'
+ :`🚛 <b>Target HARIAN:</b> bertugas setiap hari. Blok jadwal hari ini: <b>${x}/${n}</b> sudah diangkut.${lst}`}
+function kbChips(){if(!kbD||!(kbD.master||[]).length)return'<small style="color:var(--g)">Jadwal blok belum termuat. Isi lokasi pada kolom “lokasi lain”.</small>';
+ const j=kbJenis(),D=kbDone(j),M=kbD.master,h=kbHariCalc(tdy()),hr=new Set(h.bloks.map(b=>kbNk(h.cluster+' - '+b))),L=kbAll||!hr.size?M:M.filter(b=>hr.has(b.key));let last='',o='';
+ L.forEach(b=>{const i=M.indexOf(b);if(b.cluster!==last){last=b.cluster;o+=`<div class="kbh">${esc(b.cluster)}</div>`}
+  o+=`<span class="kbc${kbSel.has(b.key)?' on':''}${D.has(b.key)?' dn':''}" data-i="${i}" onclick="kbT(${i})">${esc(b.blok)}${D.has(b.key)?' ✔':''}</span>`});return o}
+function kbCnt(){const M=(kbD&&kbD.master)||[],s=M.filter(b=>kbSel.has(b.key));const e=$('#kbCnt');if(e)e.innerHTML=s.length?`Terpilih <b>${s.length}</b> blok: ${esc(s.map(b=>b.label).join(', '))}`:'Belum ada blok dipilih'}
+function kbT(i){const b=kbD.master[i];kbSel.has(b.key)?kbSel.delete(b.key):kbSel.add(b.key);const e=document.querySelector('#kbChips [data-i="'+i+'"]');if(e)e.classList.toggle('on',kbSel.has(b.key));kbCnt()}
+function kbF(f){kbAll=!!f;kbRender()}
+function kbRender(){if(!$('#kbChips'))return;$('#kbHdr').innerHTML=kbHdr();$('#targetHint').innerHTML=kbHint();$('#kbChips').innerHTML=kbChips();kbCnt();
+ const a=$('#kbB1'),b=$('#kbB2');if(a){a.className=kbAll?'o':'';b.className=kbAll?'':'o'}}
+async function kbLoad(){kbRender();const r=await api('kbJadwal',{},null,1);
+ if(r&&r.ok){kbD=r.data;try{localStorage.siagaKb=JSON.stringify(kbD)}catch(e){}}
+ if(!$('#kbChips'))return;
+ if(!kbPre&&kbD){kbPre=true;const h=kbHariCalc(tdy());h.bloks.forEach(b=>kbSel.add(kbNk(h.cluster+' - '+b)))} // blok jadwal hari ini terpilih otomatis
+ kbRender()}
 function genHtml(T){
   if(S.user.tim==='kebersihan'){
-    kjFotoSeb=''; kjFotoSes=''; kjG=null;
+    kjFotoSeb=''; kjFotoSes=''; kjG=null; kbSel=new Set(); kbAll=false; kbPre=false;
+    setTimeout(kbLoad,0);
+    const lb='font-size:12px;color:var(--g)';
     return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b>
-      <label style="font-size:12px;color:var(--g)">Jenis Pekerjaan *</label>
-      <select id="jn" onchange="updateTargetHint()">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>
-      <div id="targetHint" style="background:var(--b2);padding:8px 10px;border-radius:8px;font-size:12px;margin:6px 0;line-height:1.4">
-        🎯 <b>Target Harian:</b> Minimal <b>2 Blok per hari</b> untuk Cek Saluran Air, Potong Rumput, Potong Ranting &amp; Sapu Jalan. Wajib foto sebelum &amp; sesudah.
-      </div>
-      <label style="font-size:12px;color:var(--g)">Lokasi Pekerjaan (Blok / Area Aliran Sungai) *</label>
-      <input id="blk" placeholder="Contoh: Blok A & Blok B / Sungai Belakang RT 03">
-      
-      <label style="font-size:12px;color:var(--g)">Foto SEBELUM Pekerjaan * (wajib kamera langsung)</label>
+      <div id="kbHdr" style="background:#f0f7ff;border:1px solid #cce3ff;padding:8px 10px;border-radius:10px;font-size:12px;margin:8px 0;line-height:1.5"></div>
+      <label style="${lb}">Pekerjaan *</label>
+      <select id="jn" onchange="kbRender()">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>
+      <div id="targetHint" style="background:var(--b2);padding:8px 10px;border-radius:8px;font-size:12px;margin:6px 0;line-height:1.5"></div>
+      <label style="${lb}">Blok yang dikerjakan * (ketuk untuk memilih; ✔ = sudah selesai pada periode ini)</label>
+      <div class="row" style="grid-template-columns:1fr 1fr;margin:4px 0"><button type="button" class="" id="kbB1" onclick="kbF(0)">📅 Jadwal hari ini</button><button type="button" class="o" id="kbB2" onclick="kbF(1)">📋 Semua blok</button></div>
+      <div id="kbChips" style="max-height:250px;overflow:auto;padding:2px"></div>
+      <div id="kbCnt" style="font-size:12px;color:var(--g);margin:4px 0 8px"></div>
+      <label style="${lb}">Blok / lokasi lain (opsional; wajib untuk Pembersihan Aliran Sungai)</label>
+      <input id="blk" placeholder="Contoh: Sungai Belakang RT 03">
+
+      <label style="${lb}">Foto SEBELUM Pekerjaan * (kamera langsung, tanpa lokasi GPS)</label>
       <button class="o" onclick="kjSnap(this,'seb')"><span class="sp"></span>📷 Ambil Foto SEBELUM</button>
       <div id="kjfs1" style="font-size:12px;color:var(--g);margin-bottom:6px">Status foto sebelum: Belum diambil</div>
 
-      <label style="font-size:12px;color:var(--g)">Foto SESUDAH Pekerjaan * (wajib kamera langsung)</label>
+      <label style="${lb}">Foto SESUDAH Pekerjaan * (kamera langsung, tanpa lokasi GPS)</label>
       <button class="o" onclick="kjSnap(this,'ses')"><span class="sp"></span>📷 Ambil Foto SESUDAH</button>
       <div id="kjfs2" style="font-size:12px;color:var(--g);margin-bottom:6px">Status foto sesudah: Belum diambil</div>
 
       <textarea id="kt" placeholder="Catatan pekerjaan / kendala lapangan (opsional)"></textarea>
-      ${B('📨 Kirim Laporan Pekerjaan','kirimKerjaKebersihan','big')}
+      ${B('💾 Simpan Laporan','kirimKerjaKebersihan','big')}
     </div>`;
   }
   return `<div class="card"><b>${T.ic} Laporan Pekerjaan: ${T.n}</b><select id="jn">${T.j.map(x=>`<option>${x}</option>`).join('')}</select>${T.rumah?'<input id="rm" placeholder="Blok / No. Rumah (contoh: B-12)">':''}${T.nilai?'<input id="nl" type="number" inputmode="numeric" min="0" placeholder="Nominal (Rp)">':''}<textarea id="kt" placeholder="Catatan"></textarea>${S.user.tim==='unitusaha'?usFotoBox():''}${B(S.user.tim==='unitusaha'?'💾 Simpan Laporan':'📷 Foto & Kirim','kirimKerja')}</div>`;
@@ -276,16 +318,21 @@ async function kjSnap(b,w){
   }finally{b.classList.remove('busy')}
 }
 async function kirimKerjaKebersihan(b){
-  const blok=$('#blk').value.trim();
-  if(!blok)return toast('⚠ Isi lokasi pekerjaan (Blok / area)');
+  const j=$('#jn').value,M=(kbD&&kbD.master)||[],pil=M.filter(x=>kbSel.has(x.key)),lain=($('#blk')?$('#blk').value:'').trim(),
+   piket=j==='Pengangkutan Sampah'&&kbD&&kbHariCalc(tdy()).libur;
+  if(j==='Pembersihan Aliran Sungai'&&!lain)return toast('⚠ Isi titik / segmen sungai pada kolom lokasi lain');
+  if(!pil.length&&!lain&&!piket)return toast('⚠ Pilih blok yang dikerjakan (atau isi lokasi lain)');
   if(!kjFotoSeb)return toast('⚠ Foto SEBELUM pekerjaan wajib diambil');
   if(!kjFotoSes)return toast('⚠ Foto SESUDAH pekerjaan wajib diambil');
-  const P=btnProc(b,'Menyimpan laporan…');
-  try{
-    P.text('Menyimpan laporan…');await slp(350);
-    const r=await sendQ('kerja',{jenis:$('#jn').value,blok:blok,ket:$('#kt').value,foto:kjFotoSes,foto_sebelum:kjFotoSeb});
+  const blok=pil.map(x=>x.label).concat(lain?[lain]:[]).join(', ')||'PIKET';
+  const P=btnProc(b,'Memeriksa data…');
+  try{ // animasi proses simpan bertahap (spinner + bar berjalan + teks status)
+    await slp(350);P.text('Memproses foto…');await slp(450);
+    P.text('Menyimpan laporan…');
+    const [r]=await Promise.all([sendQ('kerja',{jenis:j,blok:blok,ket:$('#kt').value,foto:kjFotoSes,foto_sebelum:kjFotoSeb}),slp(600)]);
     if(!r.ok)return P.fail('Gagal menyimpan');
-    await P.ok('Laporan tersimpan',true);
+    if(kbD){kbD.selesai=kbD.selesai||{};kbD.selesai[j]=[...new Set((kbD.selesai[j]||[]).concat(pil.map(x=>x.key)))];try{localStorage.siagaKb=JSON.stringify(kbD)}catch(e){}} // tandai ✔ langsung
+    await P.ok('Laporan tersimpan ✔',true);
     kjFotoSeb='';kjFotoSes='';kerja();
   }catch(e){P.fail('Gagal, coba lagi')}
 }
@@ -459,18 +506,19 @@ function remindOn(){clearInterval(window.ri);if(S.user.tim!=='security')return;i
 const IPLS=[]; // harus dibuat sebelum FORM
 const FORM={
  Users:[['username','Username'],['pass','Password (kosongkan = tidak diubah)','password'],['nama','Nama lengkap'],['role','Role','select',['user','spv','admin']],['grup','Grup'],['tim','Tim','select',['kebersihan','security','maintenance','unitusaha','admin','ipl']],['patroli','Petugas patroli (khusus security)','select',['ya','tidak']]],
- Setting:[['key','Pengaturan','select',['lokasi_lat','lokasi_lng','radius','jam_masuk','jam_pulang','shift_security','total_titik','interval_patroli_jam','shift_pagi','shift_malam','jumlah_kartu_tamu','backup_simpan','sla_darurat','sla_tinggi','sla_sedang','sla_rendah','retensi_foto_id_hari']],['value','Nilai (jam format 07:00)']],
+ Setting:[['key','Pengaturan','select',['lokasi_lat','lokasi_lng','radius','jam_masuk','jam_pulang','shift_security','total_titik','interval_patroli_jam','shift_pagi','shift_malam','jumlah_kartu_tamu','backup_simpan','sla_darurat','sla_tinggi','sla_sedang','sla_rendah','retensi_foto_id_hari','kb_mulai']],['value','Nilai (jam format 07:00; kb_mulai = tanggal H1 format 2026-11-02)']],
  Titik:[['kode','Kode barcode'],['nama','Nama titik'],['blok','Blok'],['lat','Latitude'],['lng','Longitude']],
  Grup:[['grup','Nama grup'],['member','Anggota (username, pisah koma)']],
  Piket:[['tanggal','Tanggal','date'],['shift','Shift','select',['Pagi','Malam','OFF','Siang','24 Jam']],['user','Petugas (username)'],['backup','Backup bila berhalangan']],
  Berita:[['ts','Tanggal','date'],['judul','Judul'],['isi','Isi berita','textarea'],['link','Link Website (opsional, contoh: https://...)']],
  TargetIPL:[['petugas','Petugas IPL','select',IPLS],['blok','Blok'],['bulan','Bulan IPL','month'],['rumah','Jumlah rumah (unit)','number'],['tarif','Besar IPL per rumah (Rp)','number']],
+ JadwalKebersihan:[['no','Hari ke- (1-28)','number'],['kode','Kode hari (H1, H2 … atau LIBUR)'],['cluster','Cluster (kosongkan bila LIBUR)'],['blok','Blok (pisah koma, contoh: A,B,C)'],['regu1','Regu 1 (Potong Rumput / OFF)'],['regu2','Regu 2 (SAPU / OFF)'],['regu3','Regu 3 (PICKUP SAMPAH / PIKET)']],
  Katalog:[['jenis','Jenis (sampah / air mineral / gas)'],['kategori','Kategori','select',['sampah','air','gas']],['harga','Harga per satuan (Rp)','number'],['satuan','Satuan (kg, galon, botol, tabung)']]};
 function fld(f,v){const[k,l,t,o]=f,id='f_'+k;v=String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');return `<label style="font-size:12px;color:var(--g)">${l}</label>`+(t==='select'?`<select id="${id}">${o.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('')}</select>`:t==='textarea'?`<textarea id="${id}" rows=3>${v}</textarea>`:`<input id="${id}" type="${t||'text'}" value="${v}">`)}
 function editForm(row){ed=row;$('#af').innerHTML=`<b>${row?'✏ Edit data':'➕ Tambah data'}</b>`+FORM[at].map(f=>fld(f,f[2]==='month'?(row?row[f[0]]:tdy().slice(0,7)):f[2]==='date'?(row?String(row[f[0]]).slice(0,10):tdy()):row&&f[0]!=='pass'?row[f[0]]:'')).join('')+(at==='Titik'?B('📍 Isi dengan lokasi saya','myLoc','o'):'')+B('💾 Simpan','adm')+(row?B('Batal','cancelF','o'):'')}
 function cancelF(){editForm(null)}
 async function myLoc(){const g=await gps();$('#f_lat').value=g.lat.toFixed(6);$('#f_lng').value=g.lng.toFixed(6);toast('✔ Lokasi terisi')}
-async function admin(){const T=S.user.role==='admin'?['Users','Setting','Titik','Grup','Piket','Berita','Katalog','TargetIPL','Log','Backup']:['Grup','Piket','Berita','TargetIPL'];if(!T.includes(at))at=T[0];
+async function admin(){const T=S.user.role==='admin'?['Users','Setting','Titik','Grup','Piket','Berita','Katalog','TargetIPL','JadwalKebersihan','Log','Backup']:['Grup','Piket','Berita','TargetIPL'];if(!T.includes(at))at=T[0];
  $('#m').innerHTML=`<div class="card"><b>Menu Admin</b><select onchange="at=this.value;admin()">${T.map(x=>`<option ${x==at?'selected':''}>${x}</option>`).join('')}</select>${at==='Users'?B('🔒 Wajibkan Semua User Ganti Password','wjb','o'):''}</div>${at==='Log'||at==='Backup'?'':'<div class="card" id="af"></div>'}<div class="card" id="al">Memuat…</div>`;
  if(at==='TargetIPL')await loadIpls();if(at==='Backup')return backupUI();if(at!=='Log')editForm(null);const r=await api('adminList',{tabel:at});if(!r.ok)return;rd=r.data;
  $('#al').innerHTML=at==='Log'?`<div class="tw">${tbl(rd.slice(-100).reverse())}</div>`:(rd.map((x,i)=>{const k=Object.keys(x).filter(c=>c!=='_r');return `<div class="news" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="min-width:0;font-size:13px"><b>${esc(fmt(x[k[0]]))}</b><br><small style="color:var(--g)">${esc(k.slice(1).map(c=>fmt(x[c])).filter(v=>v!=='').join(' · '))}</small></div><div style="display:flex;gap:6px;flex-shrink:0">${at==='Users'?`<button class="o" style="width:auto;padding:6px 10px" onclick="resetPw(${i})">🔑</button>`:''}<button class="o" style="width:auto;padding:6px 10px" onclick="editForm(rd[${i}]);scrollTo(0,0)">Edit</button><button class="r" style="width:auto;padding:6px 10px" onclick="del_(this,${x._r})"><span class="sp"></span>Hapus</button></div></div>`}).join('')||'Belum ada data')}
@@ -737,46 +785,32 @@ async function lIpl(){const yr=lipm==='tahun',r=await api('sumIPL',{bulan:lbln,t
  if(!yr)h+='<hr class="np"><b>Per blok</b>'+tbl(d.perBlok.map(x=>({Blok:x.blok,Petugas:x.petugas,Rumah:x.rumah,'Besar IPL':Math.round(x.tarif).toLocaleString('id-ID'),'Target (Rp)':Math.round(x.target).toLocaleString('id-ID'),'Realisasi (Rp)':Math.round(x.realisasi).toLocaleString('id-ID'),Lunas:x.rumah?x.lunas+'/'+x.rumah:String(x.lunas),'Capaian %':x.rumah?x.pct:'-'})));
  else{const us=R.map(x=>x.user);if(!us.includes(lipu))lipu=us[0]||'';h+=`<hr class="np"><b>Tren bulanan ${d.tahun}</b><select class="np" onchange="lipu=this.value;lap()">${R.map(x=>`<option value="${x.user}" ${x.user==lipu?'selected':''}>${esc(x.nama)}</option>`).join('')}</select>`+tbl((d.trend[lipu]||[]).map(x=>({Bulan:x.bulan,'Target (Rp)':Math.round(x.target).toLocaleString('id-ID'),'Realisasi (Rp)':Math.round(x.realisasi).toLocaleString('id-ID'),'Capaian %':x.pct,Lunas:x.lunas+'/'+x.rumahTarget})))}
  h+='<p style="font-size:12px;color:var(--g)">Capaian = realisasi ÷ target (jumlah rumah × besar IPL) berdasarkan bulan IPL. Performa: ≥100% Sangat Baik, ≥85% Baik, ≥70% Cukup, di bawahnya Perlu Ditingkatkan.</p>';$('#lb').innerHTML=h}
+let lkbc='';
 async function lKbp(){
- const yr=lkbm==='tahun',r=await api('sumKebersihan',{bulan:lbln,tahun:lkbth},null,1);
+ const yr=lkbm==='tahun',r=await api('sumKebersihan',{bulan:lbln,tahun:lkbth,mode:yr?'tahun':'bulan'},null,1);
  if(!r.ok){$('#lb').innerHTML=r.net?off_:'⚠ '+r.msg;return}
- const d=r.data,R=yr?d.tahunRows:d.bulanRows;
- const totLap=R.reduce((a,x)=>a+x.totalLaporan,0);
- const totBlok=R.reduce((a,x)=>a+x.blokTergarap,0);
- const trgBlok=R.reduce((a,x)=>a+x.targetBlok,0);
- const avgPct=trgBlok?Math.round(totBlok/trgBlok*1000)/10:0;
- let h=`<b>🧹 Summary Performa Tim Kebersihan ${yr?d.tahun:d.bulan}</b>`+stat([['Total Laporan',totLap],['Blok Tergarap',totBlok+'/'+trgBlok],['Capaian Target',avgPct+'%']]);
- const M=R.map(x=>({
-  '#':x.peringkat,
-  Petugas:x.nama,
-  'Hari Aktif':x.hariAktif,
-  'Total Laporan':x.totalLaporan,
-  'Blok Rutin':x.blokTergarap+'/'+x.targetBlok,
-  'Capaian %':x.pctBlok+'%',
-  'Angkut Sampah':x.angkutSampah,
-  'Aliran Sungai':x.aliranSungai,
-  'Foto Lengkap':x.fotoLengkap+' ('+x.pctFoto+'%)',
-  Performa:x.rating
- }));
- h+='<b>Performa per Petugas Kebersihan</b>'+tbl(M);
- rd=M;xn='Performa_Kebersihan_'+(yr?d.tahun:d.bulan);
+ const d=r.data,R=yr?d.tahunRows:d.bulanRows,PT=d.perTim||[],PB=d.perBlok||[],RB=d.bulanRows||[];
+ const totLap=RB.reduce((a,x)=>a+x.totalLaporan,0),tT=PT.reduce((a,x)=>a+x.target,0),tS=PT.reduce((a,x)=>a+x.selesai,0),pT=tT?Math.round(tS/tT*1000)/10:0,
+  tuntas=PB.filter(x=>x.target>0&&x.selesai>=x.target).length;
+ let h=`<b>🧹 Performa Tim Kebersihan — bulan ${esc(d.bulan)}</b>`+stat([['Total Laporan',totLap],['Capaian Target Tim',pT+'%'],['Blok Tuntas',tuntas+'/'+PB.length]]);
+ h+='<hr class="np"><b>🏷 Performa per Tim (Regu)</b>'+tbl(PT.map(x=>({Tim:'Regu '+x.regu,Tugas:x.tugas,'Target (unit)':x.target,Tercapai:x.selesai,'Capaian %':x.pct+'%',Laporan:x.laporan,'Foto Lengkap':x.pctFoto+'%',Performa:x.rating,Petugas:x.petugas||'-'})));
+ h+='<b>Rincian per Pekerjaan</b>'+tbl(PT.flatMap(t=>t.jenis.map(j=>({Tim:'Regu '+t.regu,Pekerjaan:j.jenis,Target:j.periode,'Unit Target':j.target,Selesai:j.selesai,'Capaian %':j.pct+'%',Laporan:j.laporan}))));
+ if(d.hariSampah)h+=`<p style="font-size:12px;color:var(--g)">Pengangkutan sampah: ada laporan pada <b>${d.hariSampah.ada}</b> dari <b>${d.hariSampah.hari}</b> hari yang sudah berjalan bulan ini.</p>`;
+ if(yr&&(d.trendTim||[]).length)h+=`<b>Tren Capaian per Tim ${esc(d.tahun)}</b>`+tbl(d.trendTim.map(x=>({Bulan:x.bulan,'Regu 1':x.r1+'%','Regu 2':x.r2+'%','Regu 3':x.r3+'%'})));
+ const cl=[...new Set(PB.map(x=>x.cluster))];if(lkbc&&!cl.includes(lkbc))lkbc='';
+ const PBf=lkbc?PB.filter(x=>x.cluster===lkbc):PB,mk=n=>n>0?'✔ '+n:'✖ 0';
+ h+=`<hr class="np"><b>📍 Performa per Blok</b> <select class="np" style="width:auto;margin-left:6px" onchange="lkbc=this.value;lap()"><option value="">Semua cluster</option>${cl.map(c=>`<option ${c===lkbc?'selected':''}>${esc(c)}</option>`).join('')}</select>`;
+ const MB=PBf.map(x=>({Cluster:x.cluster,Blok:x.blok,'Potong Rumput':mk(x.pr),'Cek Saluran':mk(x.cs),'Potong Ranting':mk(x.rg),'Sapu (minggu)':x.sapuT?x.sapuD+'/'+x.sapuT:'-','Sampah (hari)':x.smpT?x.smpD+'/'+x.smpT:'-','Capaian %':x.pct+'%',Performa:x.rating,Terakhir:x.last||'-'}));
+ h+=tbl(MB);rd=MB;xn='Performa_Blok_Kebersihan_'+d.bulan;
+ const M=R.map(x=>{const jn=x.jn||{};return{'#':x.peringkat,Petugas:x.nama,'Hari Aktif':x.hariAktif,'Total Laporan':x.totalLaporan,'Blok Dikerjakan':x.blokUnik,'Rumput/Saluran/Ranting':(jn['Potong Rumput']||0)+(jn['Cek Saluran Air']||0)+(jn['Potong Ranting']||0),'Sapu Jalan':jn['Sapu Jalan']||0,'Angkut Sampah':x.angkutSampah,'Aliran Sungai':x.aliranSungai,'Foto Lengkap':x.fotoLengkap+' ('+x.pctFoto+'%)'}});
+ h+='<hr class="np"><b>👷 Kontribusi per Petugas '+(yr?esc(d.tahun):esc(d.bulan))+'</b>'+tbl(M);
  if(!yr){
-  h+='<hr class="np"><b>Rekap Jenis Pekerjaan ('+d.bulan+')</b>'+tbl(d.perJenis.map(x=>({'Jenis Pekerjaan':x.jenis,'Jumlah Laporan':x.jumlah,'Area / Blok':x.blok})));
+  h+='<hr class="np"><b>Rekap Jenis Pekerjaan ('+esc(d.bulan)+')</b>'+tbl(d.perJenis.map(x=>({'Jenis Pekerjaan':x.jenis,'Jumlah Laporan':x.jumlah,'Area / Blok':x.blok})));
  }else{
   const us=R.map(x=>x.user);if(!us.includes(lkbu))lkbu=us[0]||'';
-  h+=`<hr class="np"><b>Tren Bulanan ${d.tahun}</b><select class="np" onchange="lkbu=this.value;lap()">${R.map(x=>`<option value="${x.user}" ${x.user==lkbu?'selected':''}>${esc(x.nama)}</option>`).join('')}</select>`+tbl((d.trend[lkbu]||[]).map(x=>({
-   Bulan:x.bulan,
-   'Hari Aktif':x.hariAktif,
-   'Total Laporan':x.totalLaporan,
-   'Blok Rutin':x.blokTergarap+'/'+x.targetBlok,
-   'Capaian %':x.pctBlok+'%',
-   'Angkut Sampah':x.angkutSampah,
-   'Aliran Sungai':x.aliranSungai,
-   'Foto Lengkap %':x.pctFoto+'%',
-   Performa:x.rating
-  })));
+  h+=`<hr class="np"><b>Tren Bulanan Petugas ${esc(d.tahun)}</b><select class="np" onchange="lkbu=this.value;lap()">${R.map(x=>`<option value="${x.user}" ${x.user==lkbu?'selected':''}>${esc(x.nama)}</option>`).join('')}</select>`+tbl((d.trend[lkbu]||[]).map(x=>({Bulan:x.bulan,'Hari Aktif':x.hariAktif,'Total Laporan':x.totalLaporan,'Angkut Sampah':x.angkutSampah,'Aliran Sungai':x.aliranSungai,'Foto Lengkap %':x.pctFoto+'%'})));
  }
- h+='<p style="font-size:12px;color:var(--g)">Target Blok Rutin = Hari Aktif × 2 blok/hari (Cek Saluran Air, Potong Rumput, Potong Ranting, Sapu Jalan). Foto Lengkap = laporan dengan foto sebelum &amp; sesudah. Performa: ≥100% Sangat Baik, ≥85% Baik, ≥70% Cukup, &lt;70% Perlu Ditingkatkan.</p>';
+ h+='<p style="font-size:12px;color:var(--g)"><b>Cara hitung.</b> Potong Rumput, Cek Saluran Air &amp; Potong Ranting (Regu 1): setiap blok target 1× per bulan. Sapu Jalan (Regu 2): setiap blok pada jadwal harus disapu pada minggu jadwalnya. Pengangkutan Sampah (Regu 3): setiap blok jadwal tiap hari + piket pada hari libur. Target mingguan/harian dihitung sampai hari ini. Performa: ≥100% Sangat Baik, ≥85% Baik, ≥70% Cukup, &lt;70% Perlu Ditingkatkan. Foto Lengkap = laporan dengan foto sebelum &amp; sesudah.</p>';
  $('#lb').innerHTML=h;
 }
 // ===== Security: Buku Tamu & Patroli =====
